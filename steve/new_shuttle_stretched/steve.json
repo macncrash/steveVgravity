@@ -1,0 +1,13 @@
+{
+  "name": "New Shuttle (stretched bay)",
+  "document_id": "7d50bbe0-60ca-461c-adda-05d48c078204",
+  "revision": 1,
+  "kind": "design",
+  "url": "https://stevecad.studio/?document=7d50bbe0-60ca-461c-adda-05d48c078204",
+  "links": {
+    "shuttle": {
+      "document_id": "cf4b87db-20b5-41d4-b3a0-480b68700e5c",
+      "revision": 2
+    }
+  }
+}

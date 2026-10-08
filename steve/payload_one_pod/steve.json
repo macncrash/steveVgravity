@@ -1,0 +1,13 @@
+{
+  "name": "New Shuttle Payload: One Pod (7 Flight Segments)",
+  "document_id": "bd0b235b-73df-447d-9f4d-2a5a7854ce1e",
+  "revision": 5,
+  "kind": "design",
+  "url": "https://stevecad.studio/?document=bd0b235b-73df-447d-9f4d-2a5a7854ce1e",
+  "links": {
+    "segment": {
+      "document_id": "767beb53-1509-49c3-8f71-a72fa61ab1a8",
+      "revision": 2
+    }
+  }
+}

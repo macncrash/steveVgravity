@@ -1,0 +1,9 @@
+seg_len = 2700  # mm Length of one Spacelab segment
+seg_count = 7  # Number of pressurized lab segments
+seg_r = 2030  # mm Spacelab module outer radius (4.06 m dia)
+cone_len = 1300  # mm End cone length
+cone_r = 1300  # mm End cone small radius
+adapter_len = 1600  # mm Docking adapter + NDS length beyond the forward cone
+port_x = 21800  # mm Station docking port face (7*2700 + 1300 + 1600)
+orbiter_dock_x = 8300  # mm Orbiter-local X of the ODS/NDS axis
+orbiter_dock_z = 3100  # mm Orbiter-local Z of the ODS/NDS docking face (clears the cabin roof)

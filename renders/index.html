@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blowball Station Renders</title>
+<style>
+  :root { --bg: #04080f; --panel: #0b1322; --text: #dfe6f2; --dim: #8a9ab4; --accent: #6fb1ff; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1280px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  h2 { font-size: 18px; margin: 40px 0 10px; color: var(--accent); }
+  p { color: var(--dim); margin: 6px 0 14px; max-width: 80ch; }
+  img, video { width: 100%; border-radius: 8px; display: block; background: #000; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+  figure { margin: 0; background: var(--panel); border-radius: 10px; padding: 8px; }
+  figcaption { color: var(--dim); font-size: 13px; padding: 6px 4px 2px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+<h1>Blowball Station</h1>
+<p>A dandelion seed head as a space station. A 6 m hub carries 12 pods, each made of 7 Spacelab-derived flight segments, and each pod ends in a sun-tracking solar bloom. The New Shuttle docks on the axial pod. It is assembled one pod per launch, in opposite pairs (the decussate-leaf / phyllotaxis rule).</p>
+
+<h2>The thesis: one blowball</h2>
+<div class="grid">
+  <figure><img src="hero_01_full_bloom.png" alt="Full bloom over Earth"><figcaption>Full bloom over the Earth limb</figcaption></figure>
+  <figure><img src="hero_02_sunward.png" alt="Sunward face"><figcaption>Sunward: every bloom face-on to the sun</figcaption></figure>
+  <figure><img src="hero_03_from_below.png" alt="From below"><figcaption>From below: the seed head</figcaption></figure>
+  <figure><img src="hero_04_docking_axis.png" alt="Docking axis"><figcaption>New Shuttle on the axial docking pod</figcaption></figure>
+</div>
+
+<h2>Assembly, one launch at a time</h2>
+<p>The balance point returns to within 0.7 m of the hub after every second launch. The 0.15 m left at full bloom comes from the docking pod having no bloom.</p>
+<img src="stages_contact_sheet.png" alt="Launches 1 to 12">
+<div class="grid" style="margin-top:12px">
+  <figure><img src="stage_01.png" alt="Launch 1"><figcaption>Launch 1: hub + docking pod (heavy lift)</figcaption></figure>
+  <figure><img src="stage_02.png" alt="Launch 2"><figcaption>Launch 2: first opposite pair complete</figcaption></figure>
+  <figure><img src="stage_06.png" alt="Launch 6"><figcaption>Launch 6</figcaption></figure>
+  <figure><img src="stage_12.png" alt="Launch 12"><figcaption>Launch 12: full bloom</figcaption></figure>
+</div>
+
+<h2>Berthing: launch 6, seven segments, one at a time</h2>
+<p>The station arm lifts each segment out of the New Shuttle's 26.3 m bay, steps it 12 m clear, swings it round the outside of the station at a 59 m radius, then slides it in along the pod axis. Segments berth from the hub outward. Every path for launches 2–12 was checked offline and clears by at least 0.32 m.</p>
+<video src="berthing_launch06.mp4" controls loop muted playsinline></video>
+<div class="grid" style="margin-top:12px">
+  <figure><img src="berthing_t0010.png" alt="lift"><figcaption>t = 1.0 s: lifting out of the bay</figcaption></figure>
+  <figure><img src="berthing_t0045.png" alt="out"><figcaption>t = 4.5 s: heading out</figcaption></figure>
+  <figure><img src="berthing_t0105.png" alt="in"><figcaption>t = 10.5 s: sliding in along the axis</figcaption></figure>
+  <figure><img src="berthing_t0875.png" alt="done"><figcaption>t = 87.5 s: pod complete</figcaption></figure>
+</div>
+
+<h2>Gravity sim time-lapse</h2>
+<video src="gravity_timelapse.mp4" controls loop muted playsinline></video>
+<div class="grid" style="margin-top:12px">
+  <figure><img src="gravity_timelapse_0200.png" alt="Gravity 200"><figcaption>Early launches</figcaption></figure>
+  <figure><img src="gravity_timelapse_0460.png" alt="Gravity 460"><figcaption>A pod growing segment by segment</figcaption></figure>
+  <figure><img src="gravity_timelapse_0780.png" alt="Gravity 780"><figcaption>Full bloom</figcaption></figure>
+</div>
+
+<h2>Parts</h2>
+<div class="grid">
+  <figure><img src="00_flight_segment.png" alt="Flight segment"><figcaption>Flight segment (STEVE mesh)</figcaption></figure>
+  <figure><img src="steve_launch06_isometric.png" alt="STEVE view"><figcaption>STEVE's own CAD view of launch 6 with the berthing rig</figcaption></figure>
+</div>
+<p>CAD: <a href="https://stevecad.studio/?document=286c0cf5-6549-4e47-bcd1-7aaa2fd70bf3">Blowball Station in STEVE</a>. In STEVE, the Motion tab plays and exports the "berthing" animation.</p>
+</main>
+</body>
+</html>

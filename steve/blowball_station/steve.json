@@ -1,0 +1,17 @@
+{
+  "name": "Blowball Station (from Gravity)",
+  "document_id": "286c0cf5-6549-4e47-bcd1-7aaa2fd70bf3",
+  "revision": 22,
+  "kind": "design",
+  "url": "https://stevecad.studio/?document=286c0cf5-6549-4e47-bcd1-7aaa2fd70bf3",
+  "links": {
+    "segment": {
+      "document_id": "767beb53-1509-49c3-8f71-a72fa61ab1a8",
+      "revision": 3
+    },
+    "shuttle": {
+      "document_id": "cf4b87db-20b5-41d4-b3a0-480b68700e5c",
+      "revision": 2
+    }
+  }
+}
