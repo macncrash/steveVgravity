@@ -19,6 +19,9 @@ sys.path.insert(0, os.path.dirname(__file__))
 import station_mesh as M  # noqa: E402
 from orbiter_mesh import orbiter_bodies  # noqa: E402
 from params import shuttle_stretch  # noqa: E402
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "analysis"))
+import mass_budget as MB  # noqa: E402  (analysis/MASS_BUDGET.md: masses and CoM per launch)
 from render_mesh import Scene, load_stl, rot_axis  # noqa: E402
 
 G = M.G
@@ -73,21 +76,13 @@ def segment_bodies(stow, legs=None, vals=None):
 
 
 # ---------------- numbers for captions ----------------
-def stats(built, partial=None):
-    """Pods, pressurised volume, solar power, centre-of-mass offset (hub 20 t, 4 t/segment, 1.5 t/bloom)."""
-    m, cm = 20.0, np.zeros(3)
-    for q in built:
-        D = np.array(G.DIRS[q])
-        for j in range(G.segments):
-            r = G.r0 + (j + 0.5) * SEG_LEN
-            cm += 4.0 * D * r
-            m += 4.0
-        if q != 0:
-            cm += 1.5 * D * (G.r_cone + M.mast)
-            m += 1.5
+def stats(built):
+    """Pods, pressurised volume, solar power; mass and centre-of-mass offset from analysis/mass_budget.py."""
+    L = len(built)
+    _, mass_t, com = MB.com_by_launch()[L - 1]
     vol = len(built) * math.pi * (M.pod_r / 1000) ** 2 * (G.pod_len / 1000) + 4 / 3 * math.pi * (M.hub_r / 1000) ** 3
     blooms = len([q for q in built if q != 0])
-    return dict(pods=len(built), vol=vol, kw_peak=blooms * 40, kw_avg=blooms * 23, com=np.linalg.norm(cm / m) / 1000, mass=m)
+    return dict(pods=L, vol=vol, kw_peak=blooms * 40, kw_avg=blooms * 23, com=com, mass=mass_t)
 
 
 def scene_for(built, extra=(), shuttle=True, disc_bias=3000):
@@ -116,8 +111,8 @@ def render_stages():
         s = scene_for(built, shuttle=L >= 2)          # launch 1 is the heavy-lift hub flight; the Shuttle visits from launch 2
         s.render(f"{OUT}/stage_{L:02d}.png", eye=HERO_EYE, target=(0, 0, 4e3), fov=36,
                  title=f"Launch {L} of {len(G.ORDER)}: {what}",
-                 subtitle=f"{st['pods']} pods · {st['vol']:,.0f} m³ pressurised · ~{st['kw_avg']} kW orbit-average solar · "
-                          f"centre of mass {st['com']:.1f} m off the hub",
+                 subtitle=f"{st['pods']} pods · {st['mass']:,.0f} t · {st['vol']:,.0f} m³ pressurised · ~{st['kw_avg']} kW orbit-average "
+                          f"solar · centre of mass {st['com']:.1f} m off the hub",
                  footer="Order: opposite pairs (decussate leaves / phyllotaxis inhibitor rule) · " + STEVE_LINK)
         print("stage", L, round(st["com"], 2))
 
@@ -170,7 +165,7 @@ def render_hero():
     built = set(G.ORDER)
     st = stats(built)
     cap = (f"12 pods × 7 Spacelab segments · {st['vol']:,.0f} m³ pressurised (≈3× ISS) · 11 solar blooms "
-           f"~{st['kw_peak']} kW peak / ~{st['kw_avg']} kW average · ~{st['mass']:.0f} t (estimate)")
+           f"~{st['kw_peak']} kW peak / ~{st['kw_avg']} kW average · ~{st['mass']:.0f} t (analysis/MASS_BUDGET.md)")
     views = [
         ("hero_01_full_bloom", HERO_EYE, (0, 0, 4e3), 36, "One blowball: the station in full bloom", True),
         ("hero_02_sunward", (150e3, 20e3, 25e3), (0, 0, 2e3), 38, "Sunward face: every bloom turned to the sun", False),

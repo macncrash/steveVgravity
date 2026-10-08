@@ -23,6 +23,7 @@ the hub after every second launch. The default station has:
 - about 3,300 m³ pressurized (≈ 3× ISS)
 - 11 blooms at about 440 kW peak, about 250 kW orbit-average
 - 12 launches
+- about 514 t ([mass budget](analysis/MASS_BUDGET.md))
 
 These are order-of-magnitude estimates, not sized engineering. See [ROADMAP.md](ROADMAP.md).
 
@@ -35,6 +36,7 @@ These are order-of-magnitude estimates, not sized engineering. See [ROADMAP.md](
 | `steve/` | Source of the STEVE documents (station, orbiter, New Shuttle, flight segment, payload, Spacelab-7). Each folder's `steve.json` links the live document. |
 | `renders/` | Stills and videos. Open `renders/index.html`. |
 | `renders/tools/` | Render pipeline: headless sim recorder, a small mesh renderer, local tessellation of the STEVE geometry. |
+| `analysis/` | Mass budget ([MASS_BUDGET.md](analysis/MASS_BUDGET.md): 514 t, 41 t per launch) and the pod structural check ([STRUCTURAL.md](analysis/STRUCTURAL.md): STEVE static + modal with hand checks; the root flare). |
 | `ROADMAP.md` | Where the project stands and what comes next. |
 
 ## Reproduce the renders

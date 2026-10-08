@@ -1,0 +1,12 @@
+{
+  "name": "Pod Structural Model (stalk + 7-segment pod, smeared)",
+  "document_id": "eebcc9ab-8f60-4777-ac62-fae99679d451",
+  "revision": 4,
+  "kind": "part",
+  "url": "https://stevecad.studio/?document=eebcc9ab-8f60-4777-ac62-fae99679d451",
+  "links": {},
+  "studies": {
+    "static": "b2645039-60e9-4dbc-833c-b0cc130521c9",
+    "modal": "5303ae1e-ac6b-4eca-bb65-58bbcae07000"
+  }
+}

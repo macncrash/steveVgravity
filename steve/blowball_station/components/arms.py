@@ -16,7 +16,10 @@ for i, D in enumerate(DIRS):
         arms.cylinder(f"flange_{i}_{j}", radius=pod_r + 50, height=60, at=at(D, r0 + j * seg_len - 30), direction=D, op="new", body=f"flange_{i}_{j}")
         flanges.append(f"flange_{i}_{j}")
     arms.cone(f"cone_{i}", radius1=pod_r, radius2=cone_r, height=cone_len, at=at(D, r_tip), direction=D, op="new", body=f"cone_{i}")
-    tunnels.append(f"tunnel_{i}"); shells.append(f"pod_{i}"); cones.append(f"cone_{i}")
+    # root flare: the stalk widens into the pod (as a dandelion stalk flares into its seed head). In the pod study
+    # (Pod Structural Model) a flat root bulkhead bent like a plate: 77 MPa, 136 mm tip; the flare: 18 MPa, 26 mm.
+    arms.cone(f"flare_{i}", radius1=tunnel_r, radius2=pod_r, height=cone_len, at=at(D, r0 - cone_len), direction=D, op="new", body=f"flare_{i}")
+    tunnels.append(f"tunnel_{i}"); shells.append(f"pod_{i}"); cones += [f"cone_{i}", f"flare_{i}"]
 
 # pod 0 (+Z, the station axis): docking adapter with a NASA Docking System ring instead of a bloom
 D0 = DIRS[0]

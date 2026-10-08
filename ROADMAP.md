@@ -29,7 +29,7 @@ are berthed one at a time, outward from the hub, until the station blooms.
 | | Original Shuttle | New Shuttle needed | Why |
 |---|---|---|---|
 | Payload bay | 4.6 × 18.3 m | **4.6 × 26.3 m** | ODS (3 m) + 7 × 2.9 m segments + gaps, and the last segment must lift out clear of the OMS pod noses |
-| Payload to station orbit | ~16 t | **~32 t** | 7 × ~4.5 t outfitted segments (estimate) |
+| Payload to station orbit | ~16 t | **~41 t** | one pod: 7 × 5.35 t segments + stalk, cone, radiators, bloom ([MASS_BUDGET.md](analysis/MASS_BUDGET.md)) |
 | Docking | ODS / APAS | ODS + **NDS (IDSS)** | modern standard; already in the model |
 | Flights per pod | n/a | **1** | one launch = one pod |
 
@@ -50,16 +50,18 @@ are berthed one at a time, outward from the hub, until the station blooms.
 - **Gravity:** show the arm "walking" out along the pod, end over end on the grapple fixtures, like
   Canadarm2.
 
-### 2. Make it believable (engineering numbers)
+### 2. Make it believable (engineering numbers): in progress
 
-- Mass properties per stage: a real segment mass budget instead of the 4 t placeholder, and the
-  centre-of-mass track.
+- ✅ Mass properties per stage: [analysis/MASS_BUDGET.md](analysis/MASS_BUDGET.md). 5.35 t/segment, 41.3 t/pod,
+  514 t station; the CoM returns to the hub after every pair. The New Shuttle must lift ~41 t.
 - Power and thermal balance per stage:
   - The hub needs its own power until the first bloom opens.
   - The radiator area has to grow with the pods.
-- Structural check of a 7-segment pod cantilevered off the hub, under docking loads and reboost
-  (steve-simulation skill).
-- Berthing-flange design:
+- ✅ Structural check of a pod on its stalk: [analysis/STRUCTURAL.md](analysis/STRUCTURAL.md). A flat root
+  bulkhead bends like a plate (77 MPa, 136 mm); a conical **flare** fixes it (17.8 MPa, 25.6 mm, first mode
+  0.62 Hz, within 5 % of the hand check). The flare is now part of the station design.
+- Berthing-flange design (the mass budget shows a full-diameter joint carries ~1.3 MN of pressure load, so
+  it needs ~24–82 bolts, not 16):
   - bolt count and preload against cabin pressure;
   - the hatch;
   - utility pass-throughs (power, data, air, water) across every joint.
@@ -87,5 +89,5 @@ These are estimates, not sized engineering.
 | Launches | 12: 1 hub launch + 11 pod launches |
 | Pressurized volume | ~3,000 m³ (≈ 3× ISS) |
 | Solar | ~440 kW peak, ~250 kW orbit-average |
-| Mass | ~400 t |
+| Mass | ~514 t ([MASS_BUDGET.md](analysis/MASS_BUDGET.md)) |
 | Assembly time | ~1 week of berthing per launch; at a monthly flight rate, about a year to full bloom |

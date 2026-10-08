@@ -115,6 +115,7 @@ def station_bodies(built, with_hub=True):
         for j in range(segments + 1):
             out.append((frustum(pod_r + 50, pod_r + 50, 60, at(D, G.r0 + j * seg_len - 30), D, 48), COL["flange"], 0.3))
         out.append((frustum(pod_r, cone_r, cone_len, at(D, G.r_tip), D, 48), COL["pod"], 0.05))
+        out.append((frustum(tunnel_r, pod_r, cone_len, at(D, G.r0 - cone_len), D, 48), COL["pod"], 0.05))  # root flare
         # radiators: two fins edge-on to the sun, plus struts
         d, w, n = G.edge_on_frame(D)
         L = 0.6 * G.pod_len
