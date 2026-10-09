@@ -145,7 +145,12 @@ function canonical(d, n) {
 const SEG = 2.7, CONE = 1.3, MAST_EXTRA = 1.5;            // Spacelab segment & end cone (m); mast = bloom radius + 1.5 m
 const HUB = 1200, STALK = 30, POD = 280, BLOOM = 226, RAD = 96, RING = 40, BRING = 48, SHUTTLE = 2400;
 const PER = STALK + POD + BLOOM + RAD + RING + BRING, COMN = 60;
-const O_POD0 = HUB, O_SHUT = O_POD0 + MAXP * PER, O_COM = O_SHUT + SHUTTLE, O_END = O_COM + COMN;
+// Data block (particles 0..DATA-1), read back with gravity-mcp's run_sim (particleCount = sample = 5000 → every
+// particle in order). Rows 0..63: pod q's direction; rows 64..127: the direction of the pod flown at launch r + 1;
+// row 128: (pods / 100, relax progress / 2, 0). Unused rows sit at the origin. Directions are in the canonical,
+// un-spun frame at a fixed radius inside the hub, so they don't show; normalise to read them.
+const DATA = 2 * MAXP + 1, DATA_R = 0.9;
+const O_HUB = DATA, O_POD0 = O_HUB + HUB, O_SHUT = O_POD0 + MAXP * PER, O_COM = O_SHUT + SHUTTLE, O_END = O_COM + COMN;
 const M_HUB = 20, M_SEG = 4, M_BLOOM = 1.5;              // tonnes, for the centre-of-mass marker
 
 // Assembly order over the final pod directions (keep in sync with STEVE's station_geometry.py).
@@ -190,9 +195,9 @@ const COLORS = [ // per-pod block colours, in block order
 export function create(ctx) {
   const { particleCount: total, positions: pos, colors: col, params } = ctx;
   const setCol = (from, count, r, g, b) => {
-    for (let i = from; i < from + count; i++) { col[i * 3] = r; col[i * 3 + 1] = g; col[i * 3 + 2] = b; }
+    for (let i = from; i < Math.min(from + count, total); i++) { col[i * 3] = r; col[i * 3 + 1] = g; col[i * 3 + 2] = b; }
   };
-  setCol(0, HUB, 0.55, 0.72, 0.95);
+  setCol(0, DATA + HUB, 0.55, 0.72, 0.95);
   for (let q = 0; q < MAXP; q++) {
     let o = O_POD0 + q * PER;
     for (const [n, r, g, b] of COLORS) { setCol(o, n, r, g, b); o += n; }
@@ -235,14 +240,14 @@ export function create(ctx) {
       for (let a = 0; a < 20; a++) add(-14.5, y + r * Math.cos(a * 0.314), z + r * Math.sin(a * 0.314));
     while (i < SHUTTLE) add(0, 0, 0);
   }
-  for (let i = 0; i < SHUTTLE; i++) if (black[i]) { col[(O_SHUT + i) * 3] = 0.12; col[(O_SHUT + i) * 3 + 1] = 0.12; col[(O_SHUT + i) * 3 + 2] = 0.14; }
+  for (let i = 0; i < SHUTTLE; i++) if (black[i] && O_SHUT + i < total) { col[(O_SHUT + i) * 3] = 0.12; col[(O_SHUT + i) * 3 + 1] = 0.12; col[(O_SHUT + i) * 3 + 2] = 0.14; }
 
   let n = 0, k = 0, start = -1, seed = -1, relax = -1, it = 0, dirs = null, view = null, theta = 0, clock = 0;
   const reset = (p) => {
     n = Math.round(p.pods); k = p.k; start = p.start; seed = Math.round(p.seed); relax = p.relax;
     dirs = startDirs(n, start, seed); it = 0;
   };
-  const put = (i, x, y, z) => { pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z; };
+  const put = (i, x, y, z) => { if (i >= total) return; pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z; };
   const park = (from, count) => { for (let i = from; i < from + count; i++) put(i, 0, 0, 0); };
 
   const draw = (p) => {
@@ -271,8 +276,15 @@ export function create(ctx) {
     const ga = Math.PI * (3 - Math.sqrt(5));
     for (let i = 0; i < HUB; i++) {
       const y = 1 - (2 * (i + 0.5)) / HUB, r = Math.sqrt(1 - y * y), a = i * ga;
-      W(i, p.hub * r * Math.cos(a), p.hub * y, p.hub * r * Math.sin(a));
+      W(O_HUB + i, p.hub * r * Math.cos(a), p.hub * y, p.hub * r * Math.sin(a));
     }
+    const dr = DATA_R * p.hub * S;                                       // data block (see DATA)
+    for (let q = 0; q < MAXP; q++) {
+      if (q < n) put(q, view[q * 3] * dr, view[q * 3 + 1] * dr, view[q * 3 + 2] * dr); else put(q, 0, 0, 0);
+      const o = order[q];
+      if (q < n) put(MAXP + q, view[o * 3] * dr, view[o * 3 + 1] * dr, view[o * 3 + 2] * dr); else put(MAXP + q, 0, 0, 0);
+    }
+    put(2 * MAXP, n / 100, relax >= 0.5 ? (0.5 * it) / ITERS : 0.5, 0);
     // clash tests: pod roots, and bloom centres (blooms all face the sun, so they overlap when centres
     // projected onto the sun-facing plane are closer than a diameter and they sit at similar depth)
     const lim = (2 * p.podR + p.clear) / r0;

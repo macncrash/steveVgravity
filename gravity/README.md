@@ -16,9 +16,25 @@ ring marks blooms that overlap.
 
 ## Knobs → STEVE
 
-Gravity's snapshot export only stores knob values, not point positions, so the bridge is
-deterministic: STEVE re-runs the same layout (`blowball_layout.py`, a line-for-line port) from the
-same knobs. JS and Python agree to < 4e-4 on unit directions (< 7 mm at station scale).
+Gravity's snapshot export only stores knob values, not point positions. There are two bridges.
+
+**1. Through Gravity's own engine (no port).** The sim writes a small data block into particles 0–128: each pod's
+direction, the direction flown at each launch, and a header (pod count, relax progress). `handoff.mjs` runs the sim
+with [gravity-mcp](https://holodeck1.ai/mcp/)'s `run_sim`, reads the block back, and writes a data-only
+`pod_layout.py` (`N`, `DIRS` in STEVE's frame, `ORDER`):
+
+```sh
+node gravity/handoff.mjs snapshot.json                  # a Gravity snapshot, or {key: value}
+node gravity/handoff.mjs pods=20 k=12 order=1 --out /tmp/pod_layout.py
+```
+
+It takes about 3 s and needs Node 22.13+. The data rows sit inside the hub, so they don't show in Gravity.
+Against the Python port, six knob sets agree to < 7e-5 on unit directions (< 2 mm at the pod tip), with
+identical assembly order.
+
+**2. The Python port** (`blowball_layout.py`, line for line, used by STEVE today): STEVE re-runs the same layout
+from the same knobs. It agrees with Gravity to < 4e-4 on unit directions (< 7 mm at station scale). Any change to
+the sim's layout code has to be ported by hand; bridge 1 doesn't have that problem.
 
 | Gravity knob | STEVE `params.py` |
 |---|---|
