@@ -161,8 +161,8 @@ def report(rows, sweep):
            f"- **Shadowing costs {f['shade'] * 100:.0f} % of the bloom area at full bloom** "
            f"({f['shade_s'] * 100:.0f} % with the New Shuttle docked), almost all of it on three far-side blooms "
            "that sit behind other pods.",
-           f"- **Batteries are missing from the mass budget:** riding through a {T_ECL:.0f} min eclipse at full "
-           f"load needs ≈{battery(f['avg_eol'])[1] / 1000:.1f} t of batteries in all.", "",
+           f"- **Batteries:** riding through a {T_ECL:.0f} min eclipse at full load needs "
+           f"≈{battery(f['avg_eol'])[1] / 1000:.1f} t of batteries in all, now carried in MASS_BUDGET.md.", "",
            "## Assumptions", "",
            f"- **Attitude:** sun held on +X, as in the STEVE model. Every bloom faces the sun, every radiator fin is "
            "edge-on to it, and shadowing changes only as pods are added.",
@@ -215,7 +215,9 @@ def report(rows, sweep):
             f"{f['reject'][275.0] / (f['heat'] * need):.1f}×.",
             f"- **Batteries:** one eclipse at {f['avg_eol']:.0f} kW takes {kwh:.0f} kWh. At {DOD * 100:.0f} % depth "
             f"of discharge and {WH_PER_KG:.0f} Wh/kg that is ≈{kg / 1000:.1f} t "
-            f"(≈{kg / len(rows) / 1000:.2f} t per pod), missing from MASS_BUDGET.md.",
+            f"(≈{kg / len(rows) / 1000:.2f} t per pod). MASS_BUDGET.md books "
+            f"{BLOOM_KW_BOL * EOL * USABLE * T_ECL / 60 / DOD / WH_PER_KG:.2f} t on every bloom pod, sized for an "
+            "unshaded bloom, so it holds a little margin.",
             f"- **Shading falls on the far side.** Blooms whose pods point away from the sun sit behind the station, "
             "and their light passes the pods in front. The worst bloom keeps only "
             f"{min(r['worst'] for r in rows) * 100:.0f} % of its area; blooms on the sunward side are unshaded. "

@@ -57,7 +57,7 @@ Studies:
 
 - Skin buckling.
 - Fatigue.
-- Bolt preload: the flange needs ~24–82 bolts; see MASS_BUDGET.md.
+- Bolt preload: settled in [BERTHING_RING.md](BERTHING_RING.md) (20 bolts on a sealed Ø2.0 m passage).
 - Launch loads in the bay (axial g's).
 - Thermal stress.
 - Docking dynamics.

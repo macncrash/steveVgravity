@@ -1,6 +1,6 @@
 """Render the Blowball Station story into ../ (stage stills, berthing video, full-bloom hero shots).
 
-python3 render_all.py [stages|berthing|hero|all]
+python3 render_all.py [segment|stages|berthing|hero|all]
 
 Geometry: the flight segment is STEVE's own exported mesh (assets/segment). STEVE can't export print meshes for
 the full station or the lofted orbiter, so those are tessellated locally from the same code and parameters as the
@@ -100,6 +100,20 @@ def scene_for(built, extra=(), shuttle=True, disc_bias=3000):
 HERO_EYE = (100e3, -125e3, 70e3)
 
 
+# ---------------- 0. the flight segment on its own ----------------
+def render_segment():
+    s = Scene()
+    for tr, c, g, b in SEGMENT:
+        s.add(tr, c, gloss=g, max_edge=300, bias=b)
+    s.render(f"{OUT}/00_flight_segment.png", eye=(9500, -7000, 4200), target=(1450, 0, 0), fov=40, size=(1600, 1000),
+             title="Flight Segment",
+             subtitle="Berthable Spacelab segment: 16 capture latches, 20 bolts around a sealed Ø2.0 m passage, "
+                      "1.27 m hatch, self-mating utility plates (copper), ammonia umbilicals (blue)",
+             footer="STEVE: stevecad.studio/?document=767beb53-1509-49c3-8f71-a72fa61ab1a8 (rev 5) · STEVE's mesh, "
+                    "ring details tessellated locally (segment_rev5.py) · analysis/BERTHING_RING.md")
+    print("segment")
+
+
 # ---------------- 1. launch-by-launch stages ----------------
 def render_stages():
     for L in range(1, len(G.ORDER) + 1):
@@ -181,6 +195,8 @@ def render_hero():
 
 if __name__ == "__main__":
     what = sys.argv[1] if len(sys.argv) > 1 else "all"
+    if what in ("segment", "all"):
+        render_segment()
     if what in ("stages", "all"):
         render_stages()
     if what in ("hero", "all"):

@@ -11,6 +11,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "renders", "tools", "station"))
 import station_geometry as G  # noqa: E402  (same layout + order as the STEVE design)
+from berthing_ring import N_BOLT, bulkhead  # noqa: E402  (BERTHING_RING.md: the joint and the bulkhead)
 
 SOURCES = {
     "spacelab": "ESA: Spacelab-1 pressure module 8,145 kg (two 2.7 m segments + two end cones, outfitted)",
@@ -25,8 +26,10 @@ SOURCES = {
 SEGMENT = [
     # (item, kg, basis)
     ("Shell, frames, MMOD shield and subsystems (Spacelab share)", 3250, "spacelab: 8,145 kg less ~0.8 t per end cone, ÷ 2 segments"),
-    ("Two bulkheads with 1.27 m hatches (EST)", 600, "EST: Spacelab segments had no bulkheads of their own"),
-    ("Two full-diameter berthing flanges: 16 latches + bolt ring (EST)", 550, "EST: CBM-class hardware scaled to a 4.06 m ring"),
+    ("Two pressure-rated sandwich bulkheads with 1.27 m hatches", 2 * round(bulkhead()["total"]),
+     "BERTHING_RING.md: clamped plate under 1 atm, EST faces and core"),
+    (f"Two berthing flanges: 16 capture latches, {N_BOLT} bolts on a Ø2.0 m sealed passage, utility plates (EST)", 550,
+     "EST: CBM-class hardware; the flange is also the bulkhead's edge ring"),
     ("Racks and outfitting (EST)", 950, "EST: Spacelab-1 flew ~3 t of payload across 2 segments + pallet"),
 ]
 # ---------------- per pod, besides its seven segments ----------------
@@ -35,6 +38,8 @@ POD_EXTRA = [
     ("Stalk: 6.25 m pressurized tunnel Ø1.2 m + two berthing rings (EST)", 1500, "EST"),
     ("Radiators: 2 fins × 34 m² at 7 kg/m² + pumps and plumbing", 2 * 34 * 7 + 300, "radiator"),
     ("Solar bloom: 40 kW BOL array at 175 W/kg + 7.5 m mast + 2-axis gimbal", round(40000 / 175) + 520, "ultraflex + EST mast/gimbal"),
+    ("Batteries: one 36 min eclipse at the bloom's usable end-of-life power, 35 % DOD, 100 Wh/kg (EST)",
+     round(40 * 0.85 * 56 / (56 + 36 / 0.85) * 36 / 60 / 0.35 / 100 * 1000), "EST, as POWER_THERMAL.md (unshaded bloom)"),
 ]
 DOCKING_POD_EXTRA = [("End cone", 800, "spacelab"), ("Stalk (EST)", 1500, "EST"),
                      ("Radiators", 2 * 34 * 7 + 300, "radiator"), ("Docking adapter + NDS ring (EST)", 900, "EST")]
@@ -81,9 +86,10 @@ def com_by_launch():
                 for k in range(3):
                     cm[k] += seg * D[k] * r
             extra = DOCKING_POD_EXTRA if q == 0 else POD_EXTRA
-            # radius of each extra item, in the order listed: end cone, stalk, radiators, bloom / docking adapter
+            # radius of each extra item, in the order listed: end cone, stalk, radiators, bloom / docking adapter,
+            # batteries (in the end cone, at the foot of the mast)
             radii = [G.r_tip + 650, (G.hub_r + G.r0) / 2, G.r0 + 0.65 * G.pod_len,
-                     G.r_cone + 550 if q == 0 else G.r_cone + 7500]
+                     G.r_cone + 550 if q == 0 else G.r_cone + 7500, G.r_tip + 650]
             for (_, kg, _), r in zip(extra, radii):
                 for k in range(3):
                     cm[k] += kg * D[k] * r
@@ -146,9 +152,9 @@ def report():
         f"- With CBM-class bolts, a full-diameter flange needs **{bolts_needed} bolts** to hold a bare 1.5× the pressure "
         f"load in preload, or **{bolts_cbm_margin} bolts** to match the CBM's own margin ({cbm_margin:.1f}× preload over "
         "pressure load). The model's 16 latches are not enough on their own.",
-        "- Design change: let the 16 capture latches pull the joint in, then use a ring of bolts to carry the pressure. Or keep "
-        "the pressure inside each segment (closed bulkheads) and join them through a CBM-size sealed passage, which "
-        "needs only 16 bolts.",
+        f"- **Decided ([BERTHING_RING.md](BERTHING_RING.md)):** keep the pressure inside each segment behind its own "
+        f"bulkheads and seal only a Ø2.0 m passage, held by {N_BOLT} bolts at the CBM's margin. The 16 latches capture "
+        "and pull in; the bolts seal.",
         "",
         "## Sources",
         "",

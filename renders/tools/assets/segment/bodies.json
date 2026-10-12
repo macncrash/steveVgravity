@@ -9,13 +9,15 @@
   "index": 1,
   "color": "#a7adb5",
   "gloss": 0.3,
-  "bias": 0
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
  },
  {
   "index": 2,
   "color": "#7d848d",
   "gloss": 0.3,
-  "bias": 0
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
  },
  {
   "index": 3,
@@ -117,13 +119,15 @@
   "index": 19,
   "color": "#3a4048",
   "gloss": 0.2,
-  "bias": 80
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
  },
  {
   "index": 20,
   "color": "#3a4048",
   "gloss": 0.2,
-  "bias": 80
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
  },
  {
   "index": 21,
@@ -184,5 +188,257 @@
   "color": "#e0b000",
   "gloss": 0.3,
   "bias": 0
+ },
+ {
+  "index": 31,
+  "color": "#1c1d20",
+  "gloss": 0.1,
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 32,
+  "color": "#c4c9cf",
+  "gloss": 0.3,
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 33,
+  "color": "#b87333",
+  "gloss": 0.3,
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 34,
+  "color": "#b87333",
+  "gloss": 0.3,
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 35,
+  "color": "#b87333",
+  "gloss": 0.3,
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 36,
+  "color": "#b87333",
+  "gloss": 0.3,
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 37,
+  "color": "#1c1d20",
+  "gloss": 0.1,
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 38,
+  "color": "#c4c9cf",
+  "gloss": 0.3,
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 39,
+  "color": "#b87333",
+  "gloss": 0.3,
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 40,
+  "color": "#b87333",
+  "gloss": 0.3,
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 41,
+  "color": "#b87333",
+  "gloss": 0.3,
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 42,
+  "color": "#b87333",
+  "gloss": 0.3,
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 43,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 44,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 45,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 46,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 47,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 48,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 49,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 50,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 51,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 52,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 53,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 54,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 55,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 56,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 57,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 58,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 59,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 60,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 61,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 62,
+  "color": "#e6e8ea",
+  "gloss": 0.5,
+  "bias": 120,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 63,
+  "color": "#3b6fb6",
+  "gloss": 0.3,
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 64,
+  "color": "#3b6fb6",
+  "gloss": 0.3,
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 65,
+  "color": "#3b6fb6",
+  "gloss": 0.3,
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
+ },
+ {
+  "index": 66,
+  "color": "#3b6fb6",
+  "gloss": 0.3,
+  "bias": 0,
+  "source": "local tessellation (segment_rev5.py)"
  }
 ]

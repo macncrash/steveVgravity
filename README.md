@@ -23,7 +23,7 @@ the hub after every second launch. The default station has:
 - about 3,300 m³ pressurized (≈ 3× ISS)
 - 11 blooms at about 440 kW peak, 233 kW usable orbit-average (198 kW at end of life; [power and thermal](analysis/POWER_THERMAL.md))
 - 12 launches
-- about 514 t ([mass budget](analysis/MASS_BUDGET.md))
+- about 521 t ([mass budget](analysis/MASS_BUDGET.md))
 
 These are order-of-magnitude estimates, not sized engineering. See [ROADMAP.md](ROADMAP.md).
 
@@ -37,7 +37,7 @@ These are order-of-magnitude estimates, not sized engineering. See [ROADMAP.md](
 | `steve/` | Source of the STEVE documents (station, orbiter, New Shuttle, flight segment, payload, Spacelab-7). Each folder's `steve.json` links the live document. |
 | `renders/` | Stills and videos. Open `renders/index.html`. |
 | `renders/tools/` | Render pipeline: headless sim recorder, a small mesh renderer, local tessellation of the STEVE geometry. |
-| `analysis/` | Mass budget ([MASS_BUDGET.md](analysis/MASS_BUDGET.md): 514 t, 41 t per launch) and the pod structural check ([STRUCTURAL.md](analysis/STRUCTURAL.md): STEVE static + modal with hand checks; the root flare), and power and thermal per launch ([POWER_THERMAL.md](analysis/POWER_THERMAL.md): radiators fine, power 56 % of ISS density). |
+| `analysis/` | Mass budget ([MASS_BUDGET.md](analysis/MASS_BUDGET.md): 521 t, 42 t per launch) and the pod structural check ([STRUCTURAL.md](analysis/STRUCTURAL.md): STEVE static + modal with hand checks; the root flare), and power and thermal per launch ([POWER_THERMAL.md](analysis/POWER_THERMAL.md): radiators fine, power 56 % of ISS density), and the berthing ring ([BERTHING_RING.md](analysis/BERTHING_RING.md): a sealed Ø2.0 m passage, 20 bolts, self-mating utilities). |
 | `ROADMAP.md` | Where the project stands and what comes next. |
 
 ## Reproduce the renders
@@ -51,7 +51,7 @@ node gravity_record.mjs /tmp/rec.bin 840 0.0667 && python3 gravity_video.py /tmp
 ## Credits
 
 - **[STEVE](https://stevecad.studio)** for the CAD modelling: parametric parts and designs, linked documents, joints
-  and the keyframed berthing animation. The flight-segment mesh in `renders/tools/assets/` is STEVE's own export.
+  and the keyframed berthing animation. The flight-segment mesh in `renders/tools/assets/` is STEVE's own export; the berthing-ring details added in revision 5 are tessellated locally from the same dimensions (`segment_rev5.py`).
   The station and orbiter render meshes are tessellated locally from the same code and parameters as the STEVE
   documents, because STEVE can't export print meshes for an assembly this size.
 - **Gravity** (holodeck1.ai) for the simulation runtime the sim is written for.

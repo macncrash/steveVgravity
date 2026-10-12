@@ -6,7 +6,7 @@
 - **Full station:** 198 kW orbit-average usable at end of life (233 kW new) against 357 kW at ISS's power density. That is 61 W/m³, 56 % of ISS's 109 W/m³.
 - **Launch 1 has no power at all.** The hub and the docking pod carry no bloom. The first flight needs its own arrays, as ISS's first truss segment (P6) did.
 - **Shadowing costs 7 % of the bloom area at full bloom** (7 % with the New Shuttle docked), almost all of it on three far-side blooms that sit behind other pods.
-- **Batteries are missing from the mass budget:** riding through a 36 min eclipse at full load needs ≈3.4 t of batteries in all.
+- **Batteries:** riding through a 36 min eclipse at full load needs ≈3.4 t of batteries in all, now carried in MASS_BUDGET.md.
 
 ## Assumptions
 
@@ -44,7 +44,7 @@
   - A hub array for launch 1 that stays on as the hub's own supply, as ISS's P6 did.
   - Or accept a lower density: the station as drawn supports 61 W/m³, which is plenty for habitation-heavy use.
 - **Radiators have margin.** At 275 K the fins reject 326 kW against 201 kW of heat at full bloom (1.6×). If the blooms grow to close the power gap, the heat grows too, and the margin shrinks to about 0.9×.
-- **Batteries:** one eclipse at 198 kW takes 119 kWh. At 35 % depth of discharge and 100 Wh/kg that is ≈3.4 t (≈0.28 t per pod), missing from MASS_BUDGET.md.
+- **Batteries:** one eclipse at 198 kW takes 119 kWh. At 35 % depth of discharge and 100 Wh/kg that is ≈3.4 t (≈0.28 t per pod). MASS_BUDGET.md books 0.33 t on every bloom pod, sized for an unshaded bloom, so it holds a little margin.
 - **Shading falls on the far side.** Blooms whose pods point away from the sun sit behind the station, and their light passes the pods in front. The worst bloom keeps only 57 % of its area; blooms on the sunward side are unshaded. Fixes: a longer mast on the far-side pods, or a gimbal that offsets the disc out of the shadow.
 
 ## Bloom size sweep (full station, end of life)
