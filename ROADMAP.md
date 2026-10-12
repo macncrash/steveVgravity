@@ -10,18 +10,18 @@ are berthed one at a time, outward from the hub, until the station blooms.
   mass on the hub after every second launch.
 - **Flowers open last.** The solar bloom and the radiators unfold only after the pod is complete.
 
-## Where we are (2026-10-07)
+## Where we are (2026-10-12)
 
 | Piece | Where | Status |
 |---|---|---|
-| Station layout: pod directions packed on a sphere | Gravity `blowball_station.js`, STEVE `blowball_layout.py` | ✅ JS and Python agree (< 7 mm) |
+| Station layout: pod directions packed on a sphere | Gravity `blowball_station.js` → `gravity/handoff.mjs` (gravity-mcp) → STEVE `pod_layout.py` | ✅ STEVE builds from Gravity's own output; the Python port `blowball_layout.py` agrees to < 2 mm |
 | Assembly order and stage (launch N) | Gravity `order` / `launch` / `timelapse` knobs; STEVE `order` / `launches` params | ✅ identical orders in both |
 | Station v2: 12 × 7-segment pods, 12 m solar blooms, radiators | [STEVE Blowball Station](https://stevecad.studio/?document=286c0cf5-6549-4e47-bcd1-7aaa2fd70bf3) | ✅ builds |
 | Shuttle orbiter with ODS + NASA Docking System | [STEVE Orbiter](https://stevecad.studio/?document=cf4b87db-20b5-41d4-b3a0-480b68700e5c) | ✅ linked, docks on pod 0 |
 | Berthable flight segment: hatched ends, berthing flanges, trunnions, grapple | [STEVE Flight Segment](https://stevecad.studio/?document=767beb53-1509-49c3-8f71-a72fa61ab1a8) | ✅ geometry only |
 | One-pod payload: 7 segments in a 21.5 m bay | [STEVE Payload](https://stevecad.studio/?document=bd0b235b-73df-447d-9f4d-2a5a7854ce1e) | ✅ geometry only |
 | New Shuttle: orbiter with `stretch` (8.0 m → 26.3 m bay) | [STEVE Orbiter](https://stevecad.studio/?document=cf4b87db-20b5-41d4-b3a0-480b68700e5c) / [stretched](https://stevecad.studio/?document=7d50bbe0-60ca-461c-adda-05d48c078204) | ✅ |
-| Berthing animation (launch N): 7 segments, arm path lift → side → out → swing → in | STEVE station, animation `berthing` | ✅ paths checked offline for launches 2–12, ≥ 0.32 m clear |
+| Berthing animation (launch N): 7 segments, arm path lift → side → out → swing → in | STEVE station, animation `berthing` | ✅ paths checked offline for launches 2–12, ≥ 0.32 m clear; STEVE's full 48-sample sweep (rev 25) finds no collision between real parts (only the hidden motion carriers touch) |
 | Renders: 12 launch stages, berthing video, full-bloom hero shots, Gravity time-lapse | `renders/index.html` | ✅ |
 
 ## What the "new shuttle" must do (derived from the payload layout)
@@ -54,9 +54,10 @@ are berthed one at a time, outward from the hub, until the station blooms.
 
 - ✅ Mass properties per stage: [analysis/MASS_BUDGET.md](analysis/MASS_BUDGET.md). 5.35 t/segment, 41.3 t/pod,
   514 t station; the CoM returns to the hub after every pair. The New Shuttle must lift ~41 t.
-- Power and thermal balance per stage:
-  - The hub needs its own power until the first bloom opens.
-  - The radiator area has to grow with the pods.
+- ✅ Power and thermal balance per stage: [analysis/POWER_THERMAL.md](analysis/POWER_THERMAL.md). The radiators
+  have 1.6× margin. Power is short: 198 kW usable at end of life against 357 kW at ISS's power density (56 %).
+  Launch 1 has no bloom, so it needs its own arrays. Three far-side blooms lose up to 43 % to shading. Ø16.6 m blooms
+  would close the gap. Batteries (≈3.4 t) are not yet in the mass budget.
 - ✅ Structural check of a pod on its stalk: [analysis/STRUCTURAL.md](analysis/STRUCTURAL.md). A flat root
   bulkhead bends like a plate (77 MPa, 136 mm); a conical **flare** fixes it (17.8 MPa, 25.6 mm, first mode
   0.62 Hz, within 5 % of the hand check). The flare is now part of the station design.
@@ -68,10 +69,12 @@ are berthed one at a time, outward from the hub, until the station blooms.
 
 ### 3. Make the bridge automatic
 
-- **Gravity:** add a way for a sim to hand data to CAD, for example `ctx.export(json)`. The
-  snapshot export currently carries knob values only.
-- **MCP server:** take Gravity knob values and update the STEVE `params.py`, then rebuild. The
-  same server could expose `layout()`, `order()` and `stage()`.
+- ✅ **Gravity → STEVE data:** the sim writes a hidden data block; `gravity/handoff.mjs` reads it back through
+  gravity-mcp's `run_sim` and writes `pod_layout.py`, which STEVE builds from. STEVE refuses to build if
+  `params.py` and `pod_layout.py` were made with different knobs. No hand-ported layout code is needed.
+- **Still manual:** uploading `pod_layout.py` and the geometry knobs to STEVE, then rebuilding. An agent with
+  both MCP servers does it in one pass; a single command would need STEVE's API outside MCP.
+- **Gravity wish list:** `ctx.export(json)` as a first-class version of the data block.
 
 ### 4. Grow bigger (nature's next pattern)
 

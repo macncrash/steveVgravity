@@ -26,9 +26,13 @@ for i in range(16):
     model.box(lid, 100, 120, 120, at=(L - FL / 2, (R + 110) * math.cos(a), (R + 110) * math.sin(a)), op="new", body=lid)
     latches.append(lid)
 
-# Hatches (1.27 m square passage, as on the ISS Common Berthing Mechanism), flush in both bulkheads
-model.box("hatch_passive", 20, 1500, 1500, at=(-10, 0, 0), op="new", body="hatch_passive")
-model.box("hatch_active", 20, 1500, 1500, at=(L + 10, 0, 0), op="new", body="hatch_active")
+# Hatches (1.27 m square passage, as on the ISS Common Berthing Mechanism), flush in both bulkheads:
+# each sits in a 20 mm pocket in its flange, so mated segments meet flange face to flange face
+HT = 20           # mm hatch thickness
+model.box("pocket_passive", HT, 1500, 1500, at=(HT / 2, 0, 0), op="cut", body="flange_passive")
+model.box("pocket_active", HT, 1500, 1500, at=(L - HT / 2, 0, 0), op="cut", body="flange_active")
+model.box("hatch_passive", HT, 1500, 1500, at=(HT / 2, 0, 0), op="new", body="hatch_passive")
+model.box("hatch_active", HT, 1500, 1500, at=(L - HT / 2, 0, 0), op="new", body="hatch_active")
 
 # Payload-bay mounting: four longeron trunnions (+/-Y) and a keel pin (-Z), like every Shuttle payload
 pins = []

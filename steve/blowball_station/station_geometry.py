@@ -1,12 +1,16 @@
 """Shared Blowball Station geometry: pod directions, radii and orientation frames (STEVE frame, Z up, mm)."""
 import math
 from params import pods, k, start, seed, relax, hub_r, reach, segments, seg_len, cone_len, order, launches, berthing
-from blowball_layout import pod_directions, to_steve, build_order
+import pod_layout                          # written by gravity/handoff.mjs from Gravity's own run (gravity-mcp)
 
 SUN = (1.0, 0.0, 0.0)                      # every bloom tracks the sun; +X is the sun line in this model
-_dirs = pod_directions(pods, k, start, seed, relax)
-DIRS = [to_steve(d) for d in _dirs]        # DIRS[0] = +Z = docking axis
-ORDER = build_order(_dirs, int(order))     # assembly sequence; ORDER[0] = 0 flies with the hub
+_want = {"pods": pods, "k": k, "start": start, "seed": seed, "relax": relax, "order": order}
+_stale = {key: (v, pod_layout.KNOBS.get(key)) for key, v in _want.items() if pod_layout.KNOBS.get(key) != v}
+if _stale:
+    raise ValueError(f"pod_layout.py was made with other knobs (params, layout): {_stale}. "
+                     "Re-run gravity/handoff.mjs with these knobs and upload pod_layout.py.")
+DIRS = [tuple(d) for d in pod_layout.DIRS]  # DIRS[0] = +Z = docking axis
+ORDER = list(pod_layout.ORDER)             # assembly sequence; ORDER[0] = 0 flies with the hub
 BUILT = set(ORDER[:max(0, int(launches))])  # pods on station after `launches` launches
 # With berthing on, the last launch's pod is still in the Shuttle's bay as loose flight segments (main.py animates them)
 ARRIVING = ORDER[int(launches) - 1] if berthing and 2 <= int(launches) <= len(ORDER) else None
