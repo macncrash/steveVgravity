@@ -32,7 +32,15 @@ SOURCES = {
 }
 
 # ---------------- generation ----------------
-BLOOM_KW_BOL = 40.0          # per bloom, as MASS_BUDGET.md (113 m² at ≈354 W/m², ≈26 % cells)
+KW_PER_M2 = 40.0 / (math.pi * 6.0 ** 2)   # ≈354 W/m² in full sun when new (≈26 % cells): 40 kW on a 12 m bloom
+
+
+def bloom_kw(d_mm):
+    """A bloom's array power in full sun, new (kW)."""
+    return KW_PER_M2 * math.pi * (d_mm / 2000) ** 2
+
+
+BLOOM_KW_BOL = bloom_kw(bloom_d)            # per bloom, as MASS_BUDGET.md
 EOL = 0.85                   # EST: 15 years of cell degradation
 T_ORBIT, T_ECL = 92.0, 36.0  # min (leo, worst case β = 0)
 T_SUN = T_ORBIT - T_ECL
@@ -79,7 +87,8 @@ def sun_view(built, shuttle):
         t = np.array([-G.ORB_DOCK_X, 0, G.r_port + G.ORB_DOCK_Z])
         bodies += [(tr @ R.T + t, c) for tr, c, *_ in orbiter_bodies(stretch=shuttle_stretch)]
     tris, ids, disc_of = [], [], {}
-    centres = {q: np.array(G.at(G.DIRS[q], G.r_cone + mast)) for q in built}
+    centres = {q: np.array(G.at(G.DIRS[q], G.r_cone + M.mast)) for q in built if q != 0}
+    centres["hub"] = np.array(G.at(G.HUB_BLOOM, G.r_cone + M.mast))      # the hub's own bloom flies with launch 1
     for b, (t, col) in enumerate(bodies):
         if col == M.COL["disc"]:
             c = t.reshape(-1, 3).mean(axis=0)
@@ -96,7 +105,7 @@ def sun_view(built, shuttle):
     for i in order:
         draw.polygon([tuple(p) for p in uv[i]], fill=int(ids[i]))
     buf = np.asarray(img)
-    full = 12 * (bloom_d / 2) ** 2 * math.sin(2 * math.pi / 24) / PX ** 2   # the disc is a 24-gon (station_mesh)
+    full = 12 * (M.bloom_d / 2) ** 2 * math.sin(2 * math.pi / 24) / PX ** 2   # the disc is a 24-gon (station_mesh)
     counts = np.bincount(buf.ravel(), minlength=len(bodies) + 1)
     return {q: min(1.0, counts[b + 1] / full) for b, q in disc_of.items()}
 
@@ -129,16 +138,27 @@ def stages():
     return rows
 
 
-def bloom_sweep(diams=(12000, 14000, 16000, 17000, 18000)):
-    """Full station: shading and usable end-of-life power for other bloom diameters (shading grows with size)."""
-    global bloom_d
-    keep, rows = bloom_d, []
+def set_bloom(d_mm):
+    """Draw every bloom (and its mast: radius + 1.5 m, as params.py) at another diameter."""
+    M.bloom_d, M.mast = d_mm, d_mm // 2 + 1500
+
+
+def bloom_sweep(diams=(12000, 14000, 15000, 16000, 16500, 17000, 17500)):
+    """Shading and usable end-of-life power for other bloom diameters (shading grows with size): the full station,
+    and the worst launch-by-launch balance against demand at ISS density."""
+    rows = []
     for D in diams:
-        bloom_d = M.bloom_d = D
-        lit = sun_view(set(G.ORDER), shuttle=False)
-        kw = sum(BLOOM_KW_BOL * (D / keep) ** 2 * f for f in lit.values()) * USABLE * EOL
-        rows.append((D, 1 - sum(lit.values()) / len(lit), kw))
-    bloom_d = M.bloom_d = keep
+        set_bloom(D)
+        worst, full = None, None
+        for L in range(1, len(G.ORDER) + 1):
+            built = set(G.ORDER[:L])
+            lit = sun_view(built, shuttle=False)
+            kw = sum(bloom_kw(D) * f for f in lit.values()) * USABLE * EOL
+            bal = kw - ISS_KW_PER_M3 * (HUB_VOL + L * pod_volume())
+            worst = bal if worst is None else min(worst, bal)
+            full = (1 - sum(lit.values()) / len(lit), kw)
+        rows.append((D, *full, worst))
+    set_bloom(bloom_d)
     return rows
 
 
@@ -150,24 +170,35 @@ def battery(load_kw):
 
 def report(rows, sweep):
     f = rows[-1]
+    short = [r for r in rows if r["avg_eol"] < r["demand"]]
+    hub_kw = bloom_kw(bloom_d) * USABLE * EOL
     out = ["# Blowball Station: power and thermal balance (step 2)", "",
            "**Question:** do the blooms power the station, and can the radiators get rid of the heat, at every launch?", "",
-           "**Answer:** the radiators are fine throughout; power is short.",
+           f"**Answer:** yes, with Ø{bloom_d / 1000:.0f} m blooms, a bloom on the hub, and {rad_w / 1000:.1f} m "
+           "radiator fins (the Ø12 m blooms, no hub array and 3 m fins of the first pass fell short; see the history below).",
            f"- **Full station:** {f['avg_eol']:.0f} kW orbit-average usable at end of life ({f['avg_bol']:.0f} kW new) "
-           f"against {f['demand']:.0f} kW at ISS's power density. That is {f['density'] * 1000:.0f} W/m³, "
+           f"against {f['demand']:.0f} kW at ISS's power density: {f['density'] * 1000:.0f} W/m³, "
            f"{f['density'] / ISS_KW_PER_M3 * 100:.0f} % of ISS's {ISS_KW_PER_M3 * 1000:.0f} W/m³.",
-           "- **Launch 1 has no power at all.** The hub and the docking pod carry no bloom. The first flight needs its "
-           "own arrays, as ISS's first truss segment (P6) did.",
+           f"- **Launch 1 has power now.** The hub carries its own bloom on a {(G.r_cone + mast - M.hub_r) / 1000:.1f} m "
+           f"mast in the widest gap between pods, as ISS's first truss segment (P6) did. It gives ≈{hub_kw:.0f} kW "
+           "usable at end of life and stays on as the hub's own supply.",
+           ("- **Every launch is in surplus" + (f" except launch {', '.join(str(r['L']) for r in short)}" if short else "")
+            + "**" + (f": {short[0]['avg_eol']:.0f} kW against {short[0]['demand']:.0f} kW "
+                      f"({short[0]['avg_eol'] / short[0]['demand'] * 100:.0f} %), and launch 1 flies uncrewed."
+                      if short else ".")),
+           f"- **Radiators keep a margin at every launch:** {min(r['reject'][275.0] / r['heat'] for r in rows if r['heat']):.2f}× "
+           f"or better at 275 K ({f['reject'][275.0] / f['heat']:.2f}× at full bloom).",
            f"- **Shadowing costs {f['shade'] * 100:.0f} % of the bloom area at full bloom** "
-           f"({f['shade_s'] * 100:.0f} % with the New Shuttle docked), almost all of it on three far-side blooms "
-           "that sit behind other pods.",
+           f"({f['shade_s'] * 100:.0f} % with the New Shuttle docked), mostly on far-side blooms behind other pods. "
+           "The hub bloom is never shaded.",
            f"- **Batteries:** riding through a {T_ECL:.0f} min eclipse at full load needs "
-           f"≈{battery(f['avg_eol'])[1] / 1000:.1f} t of batteries in all, now carried in MASS_BUDGET.md.", "",
+           f"≈{battery(f['avg_eol'])[1] / 1000:.1f} t of batteries in all, carried in MASS_BUDGET.md.", "",
            "## Assumptions", "",
-           f"- **Attitude:** sun held on +X, as in the STEVE model. Every bloom faces the sun, every radiator fin is "
+           "- **Attitude:** sun held on +X, as in the STEVE model. Every bloom faces the sun, every radiator fin is "
            "edge-on to it, and shadowing changes only as pods are added.",
-           f"- **Blooms:** {BLOOM_KW_BOL:.0f} kW each in full sun when new (MASS_BUDGET.md); {EOL:.2f} × that at "
-           f"end of life (EST).",
+           f"- **Blooms:** Ø{bloom_d / 1000:.0f} m, {BLOOM_KW_BOL:.0f} kW each in full sun when new "
+           f"({KW_PER_M2 * 1000:.0f} W/m², ≈26 % cells, as the first pass's 40 kW on Ø12 m); {EOL:.2f} × that at end "
+           f"of life (EST). Each sits on a mast of radius + 1.5 m ({mast / 1000:.1f} m), as in Gravity.",
            f"- **Orbit:** {T_ORBIT:.0f} min with {T_ECL:.0f} min of eclipse (worst case). Batteries carry the "
            f"eclipse at {ETA_BATT:.2f} round trip (EST), so the usable continuous power is {USABLE:.3f} × the "
            "sunlit array power.",
@@ -175,13 +206,14 @@ def report(rows, sweep):
            "This is a heavy-science benchmark, not a requirement.",
            f"- **Heat:** all usable power becomes heat, plus {CREW_PER_POD} crew per pod at {CREW_W:.0f} W (EST). "
            "Heat soaking in through the MLI is not counted.",
-           f"- **Radiators:** {FIN_AREA:.1f} m² of fin per pod (two 3 m × {0.6 * G.pod_len / 1000:.1f} m fins), "
-           f"both faces radiating. ε {EPS}, α {ALPHA} (Z-93-class white), fin efficiency {FIN_EFF} (EST). "
+           f"- **Radiators:** {FIN_AREA:.1f} m² of fin per pod (two {rad_w / 1000:.1f} m × {0.6 * G.pod_len / 1000:.1f} m "
+           f"fins), both faces radiating. ε {EPS}, α {ALPHA} (Z-93-class white), fin efficiency {FIN_EFF} (EST). "
            f"Orbit-average view factor to Earth {F_EARTH} for both faces together (EST). Net rejection per m² of "
            "fin: " + ", ".join(f"{fin_kw_per_m2(T) * 1000:.0f} W at {T:.0f} K" for T in T_RAD) + ".",
            "- **Shadowing:** the station drawn as seen from the sun at 50 mm per pixel, from the same tessellation "
            "as the renders (station_mesh.py, orbiter_mesh.py). Masts and spars are left out (see the code).", "",
            "## Launch by launch", "",
+           "Blooms include the hub's.", "",
            "| Launch | Pod | Blooms | Shaded | Usable, new (kW) | Usable, end of life (kW) | Demand at ISS density (kW) | "
            "Balance (kW) | Heat (kW) | Radiator capacity at 265 / 275 / 285 K (kW) |",
            "|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|"]
@@ -191,42 +223,43 @@ def report(rows, sweep):
         out.append(f"| {r['L']} | {r['pod']} | {r['blooms']} | {r['shade'] * 100:.1f} % | {r['avg_bol']:.0f} | "
                    f"{r['avg_eol']:.0f} | {r['demand']:.0f} | {bal:+.0f} | {r['heat']:.0f} | {rej} |")
     kwh, kg = battery(f["avg_eol"])
-    need = f["demand"] / f["avg_eol"]
-    d_need = float(np.interp(f["demand"], [kw for *_, kw in sweep], [D for D, *_ in sweep])) / 1000
     out += ["",
             "## Reading it", "",
-            f"- **Power is the binding constraint.** Each new pod adds {pod_volume():.0f} m³ and one bloom worth "
-            f"≈{BLOOM_KW_BOL * USABLE * EOL:.0f} kW usable at end of life; at ISS density that pod wants "
-            f"{ISS_KW_PER_M3 * pod_volume():.0f} kW. The hub and the docking pod add "
-            f"{ISS_KW_PER_M3 * (HUB_VOL + pod_volume()):.0f} kW of demand and no bloom.",
-            f"- **Ways to close it:**",
-            f"  - Larger blooms: Ø{d_need:.1f} m instead of Ø{bloom_d / 1000:.0f} m covers ISS density at end of "
-            "life. Larger discs shade each other more, so this comes from the sweep below, not from scaling the "
-            f"area. Bloom centres sit ≈40 m apart, so the discs still clear each other physically. The mast must stay "
-            f"longer than the bloom radius: ≈{d_need / 2 + 1.5:.1f} m instead of {mast / 1000:.1f} m (Gravity uses "
-            "radius + 1.5 m).",
-            "  - Better cells: ≈32 % triple-junction cells instead of ≈26 % gives about 1.2× per m².",
-            "  - A hub array for launch 1 that stays on as the hub's own supply, as ISS's P6 did.",
-            "  - Or accept a lower density: the station as drawn supports "
-            f"{f['density'] * 1000:.0f} W/m³, which is plenty for habitation-heavy use.",
-            f"- **Radiators have margin.** At 275 K the fins reject {f['reject'][275.0]:.0f} kW against "
-            f"{f['heat']:.0f} kW of heat at full bloom ({f['reject'][275.0] / f['heat']:.1f}×). If the blooms "
-            "grow to close the power gap, the heat grows too, and the margin shrinks to about "
-            f"{f['reject'][275.0] / (f['heat'] * need):.1f}×.",
+            f"- **What each pod brings:** {pod_volume():.0f} m³, which wants {ISS_KW_PER_M3 * pod_volume():.0f} kW at "
+            f"ISS density, and one bloom worth ≈{BLOOM_KW_BOL * USABLE * EOL:.0f} kW usable at end of life before "
+            "shading. The hub and the docking pod want "
+            f"{ISS_KW_PER_M3 * (HUB_VOL + pod_volume()):.0f} kW and get the hub bloom's {hub_kw:.0f} kW.",
+            "- **Why the hub bloom, not only bigger blooms:** without it launch 1 has no power at all, and the hub and "
+            "docking pod's demand is a debt that the pod blooms only pay back after several launches. The sweep below "
+            "shows it: every size up to the chosen one leaves some early launch short.",
+            "- **Where the hub bloom goes:** the centre of the widest gap between three pods, near the equator (clear "
+            "of the berthing lanes, which run above the docking pod's neighbours), as far off the sun line as possible "
+            "(station_geometry.hub_bloom_dir). Gravity and STEVE compute it from the same pod directions.",
+            "- **Other ways to buy the same power:** ≈32 % triple-junction cells instead of ≈26 % give about 1.2× per "
+            "m², which would allow ≈Ø15.5 m blooms. Or accept a lower density for habitation-heavy use.",
+            f"- **Radiators:** the bigger blooms put more heat into the station, so the fins grew from 3 m to "
+            f"{rad_w / 1000:.1f} m wide. At 275 K they reject {f['reject'][275.0]:.0f} kW against {f['heat']:.0f} kW of "
+            f"heat at full bloom ({f['reject'][275.0] / f['heat']:.2f}×). Running the loop warmer (285 K) gives "
+            f"{f['reject'][285.0] / f['heat']:.2f}×.",
             f"- **Batteries:** one eclipse at {f['avg_eol']:.0f} kW takes {kwh:.0f} kWh. At {DOD * 100:.0f} % depth "
             f"of discharge and {WH_PER_KG:.0f} Wh/kg that is ≈{kg / 1000:.1f} t "
-            f"(≈{kg / len(rows) / 1000:.2f} t per pod). MASS_BUDGET.md books "
-            f"{BLOOM_KW_BOL * EOL * USABLE * T_ECL / 60 / DOD / WH_PER_KG:.2f} t on every bloom pod, sized for an "
+            f"(≈{kg / len(rows) / 1000:.2f} t per bloom). MASS_BUDGET.md books "
+            f"{BLOOM_KW_BOL * EOL * USABLE * T_ECL / 60 / DOD / WH_PER_KG:.2f} t on every bloom, sized for an "
             "unshaded bloom, so it holds a little margin.",
-            f"- **Shading falls on the far side.** Blooms whose pods point away from the sun sit behind the station, "
-            "and their light passes the pods in front. The worst bloom keeps only "
-            f"{min(r['worst'] for r in rows) * 100:.0f} % of its area; blooms on the sunward side are unshaded. "
-            "Fixes: a longer mast on the far-side pods, or a gimbal that offsets the disc out of the shadow.", "",
-            "## Bloom size sweep (full station, end of life)", "",
-            "| Bloom Ø (m) | Shaded | Usable (kW) | At ISS density? |", "|---:|---:|---:|---|"]
-    out += [f"| {D / 1000:.0f} | {sh * 100:.1f} % | {kw:.0f} | {'yes' if kw >= f['demand'] else 'no'} |"
-            for D, sh, kw in sweep]
+            f"- **Shading falls on the far side.** Blooms whose pods point away from the sun sit behind the station. "
+            f"The worst bloom keeps only {min(r['worst'] for r in rows) * 100:.0f} % of its area; blooms on the sunward "
+            "side are unshaded. Fixes: a longer mast on the far-side pods, or a gimbal that offsets the disc out of "
+            "the shadow.", "",
+            "## Bloom size sweep (with the hub bloom, end of life)", "",
+            "| Bloom Ø (m) | Shaded at full bloom | Usable at full bloom (kW) | Worst launch balance (kW) |",
+            "|---:|---:|---:|---:|"]
+    out += [f"| {D / 1000:g} | {sh * 100:.1f} % | {kw:.0f} | {worst:+.0f} |" for D, sh, kw, worst in sweep]
     out += ["",
+            "## History", "",
+            "- **First pass (Ø12 m blooms, no hub bloom, 3 m fins):** 198 kW usable at full bloom against 357 kW "
+            "(56 % of ISS density), every launch short, launch 1 with no power at all; the radiators had 1.6× margin.",
+            "- **Now:** the numbers above. The station grew by the bigger arrays, masts, batteries and fins and by the "
+            "hub bloom (MASS_BUDGET.md).", "",
             "## Not modelled (never claimed)", "",
             "- Attitudes other than sun-held (e.g. local-vertical for Earth observation), and the station's own "
             "gravity-gradient torque in sun-held attitude.",
@@ -246,7 +279,7 @@ if __name__ == "__main__":
               f"(+shuttle {r['shade_s'] * 100:4.1f}%) usable {r['avg_bol']:5.0f}/{r['avg_eol']:5.0f} kW "
               f"demand {r['demand']:5.0f} heat {r['heat']:5.0f} reject@275 {r['reject'][275.0]:5.0f}")
     sweep = bloom_sweep()
-    for D, sh, kw in sweep:
-        print(f"bloom {D / 1000:.0f} m: shaded {sh * 100:.1f}%, usable {kw:.0f} kW")
+    for D, sh, kw, worst in sweep:
+        print(f"bloom {D / 1000:g} m: shaded {sh * 100:.1f}%, usable {kw:.0f} kW, worst launch {worst:+.0f} kW")
     open(os.path.join(HERE, "POWER_THERMAL.md"), "w").write(report(rows, sweep))
     print("wrote POWER_THERMAL.md")

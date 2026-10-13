@@ -6,6 +6,7 @@ Geometry: the flight segment is STEVE's own exported mesh (assets/segment). STEV
 the full station or the lofted orbiter, so those are tessellated locally from the same code and parameters as the
 STEVE documents (station_mesh.py, orbiter_mesh.py).
 """
+import functools
 import json
 import math
 import os
@@ -81,8 +82,16 @@ def stats(built):
     L = len(built)
     _, mass_t, com = MB.com_by_launch()[L - 1]
     vol = len(built) * math.pi * (M.pod_r / 1000) ** 2 * (G.pod_len / 1000) + 4 / 3 * math.pi * (M.hub_r / 1000) ** 3
-    blooms = len([q for q in built if q != 0])
-    return dict(pods=L, vol=vol, kw_peak=blooms * 40, kw_avg=blooms * 23, com=com, mass=mass_t)
+    pw = _power()[L]
+    return dict(pods=L, vol=vol, blooms=pw["blooms"], kw_peak=round(pw["sun_kw"]), kw_avg=round(pw["avg_eol"]),
+                com=com, mass=mass_t)
+
+
+@functools.lru_cache(maxsize=None)
+def _power():
+    """analysis/POWER_THERMAL.md per launch: blooms (the hub's included), sunlit and usable end-of-life power."""
+    import power_thermal as PT
+    return {r["L"]: r for r in PT.stages()}
 
 
 def scene_for(built, extra=(), shuttle=True, disc_bias=3000):
@@ -126,9 +135,27 @@ def render_stages():
         s.render(f"{OUT}/stage_{L:02d}.png", eye=HERO_EYE, target=(0, 0, 4e3), fov=36,
                  title=f"Launch {L} of {len(G.ORDER)}: {what}",
                  subtitle=f"{st['pods']} pods · {st['mass']:,.0f} t · {st['vol']:,.0f} m³ pressurised · ~{st['kw_avg']} kW orbit-average "
-                          f"solar · centre of mass {st['com']:.1f} m off the hub",
+                          f"usable solar · centre of mass {st['com']:.1f} m off the hub",
                  footer="Order: opposite pairs (decussate leaves / phyllotaxis inhibitor rule) · " + STEVE_LINK)
         print("stage", L, round(st["com"], 2))
+
+
+def render_stage_sheet():
+    """All twelve stage stills on one sheet (4 × 3), cropped below their captions."""
+    from PIL import Image, ImageDraw, ImageFont
+    ft = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial Bold.ttf", 30)
+    fl = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial Bold.ttf", 22)
+    sheet = Image.new("RGB", (2560, 1450), (3, 8, 20))
+    d = ImageDraw.Draw(sheet)
+    d.text((24, 20), f"Blowball Station: one pod per launch, opposite pairs (launches 1–{len(G.ORDER)})",
+           fill=(232, 238, 248), font=ft)
+    for L in range(1, len(G.ORDER) + 1):
+        x, y = 640 * ((L - 1) % 4), 70 + 460 * ((L - 1) // 4)
+        im = Image.open(f"{OUT}/stage_{L:02d}.png").convert("RGB").crop((180, 130, 1420, 955)).resize((640, 430))
+        sheet.paste(im, (x, y + 30))
+        d.text((x + 14, y + 4), f"Launch {L}", fill=(232, 238, 248), font=fl)
+    sheet.save(f"{OUT}/stages_contact_sheet.png")
+    print("stage sheet")
 
 
 # ---------------- 2. berthing sequence (launch 6) ----------------
@@ -164,7 +191,7 @@ def render_berthing(L=6, dt=0.25):
                   title=f"Launch {L}: berthing pod {G.ARRIVING}, segment {seg_no} of 7",
                   subtitle="New Shuttle docked on the axial pod · station arm: lift out of the bay → step clear → swing round "
                            "the outside → slide in along the pod axis",
-                  footer=f"t = {t:5.1f} s (animation 'berthing' in STEVE) · paths checked offline: ≥ 0.32 m clear")
+                  footer=f"t = {t:5.1f} s (animation 'berthing' in STEVE) · paths checked offline: ≥ 0.28 m clear outside the bay")
         if round(t, 2) in stills:
             shutil.copy(path, f"{OUT}/berthing_t{int(round(t * 10)):04d}.png")
         f += 1
@@ -178,8 +205,9 @@ def render_berthing(L=6, dt=0.25):
 def render_hero():
     built = set(G.ORDER)
     st = stats(built)
-    cap = (f"12 pods × 7 Spacelab segments · {st['vol']:,.0f} m³ pressurised (≈3× ISS) · 11 solar blooms "
-           f"~{st['kw_peak']} kW peak / ~{st['kw_avg']} kW average · ~{st['mass']:.0f} t (analysis/MASS_BUDGET.md)")
+    cap = (f"12 pods × 7 Spacelab segments · {st['vol']:,.0f} m³ pressurised (≈3× ISS) · {st['blooms']} solar blooms "
+           f"(one on the hub) ~{st['kw_peak']} kW in sun / ~{st['kw_avg']} kW usable · ~{st['mass']:.0f} t "
+           "(analysis/MASS_BUDGET.md, POWER_THERMAL.md)")
     views = [
         ("hero_01_full_bloom", HERO_EYE, (0, 0, 4e3), 36, "One blowball: the station in full bloom", True),
         ("hero_02_sunward", (150e3, 20e3, 25e3), (0, 0, 2e3), 38, "Sunward face: every bloom turned to the sun", False),
@@ -199,6 +227,7 @@ if __name__ == "__main__":
         render_segment()
     if what in ("stages", "all"):
         render_stages()
+        render_stage_sheet()
     if what in ("hero", "all"):
         render_hero()
     if what in ("berthing", "all"):

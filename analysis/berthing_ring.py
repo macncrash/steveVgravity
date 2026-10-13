@@ -9,6 +9,9 @@ pressure inside each segment and seal only a CBM-size passage instead? Every num
 import math
 import os
 
+from power_thermal import EOL, USABLE, bloom_kw  # POWER_THERMAL.md
+from params import bloom_d
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 SOURCES = {
     "cbm": "NASA NTRS 20100001671: CBM, 16 powered bolts preloaded to ≈84.5 kN (19 kip); 1.27 m (50 in) square hatch",
@@ -17,7 +20,7 @@ SOURCES = {
                  "Mating Adapters connect power, data and ammonia lines by themselves when the bolts drive",
     "iss_imv": "NASA: ISS modules exchange air through Intermodule Ventilation (IMV) ducts and valves at the hatches",
     "structural": "STRUCTURAL.md / pod_beam_check.py: 133 kN·m docking moment + 33 kN·m from 0.05 m/s² at the pod root",
-    "power": "POWER_THERMAL.md: 40 kW per bloom new, 0.85 at end of life, 0.569 usable through the eclipse",
+    "power": "POWER_THERMAL.md: a bloom's power new, 0.85 at end of life, 0.569 usable through the eclipse",
 }
 
 P = 101325.0                       # Pa, cabin pressure
@@ -69,8 +72,8 @@ def bulkhead():
 
 
 # ---------------- what crosses the joint ----------------
-BLOOM_KW = 40.0                    # in full sun, new: the joint must pass all of it toward the hub
-POD_HEAT_KW = 40.0 * 0.85 * 0.569 + 2 * 0.12   # usable bloom power (all ends as heat) + 2 crew, unshaded bloom
+BLOOM_KW = bloom_kw(bloom_d)       # in full sun, new: the joint must pass all of it toward the hub
+POD_HEAT_KW = BLOOM_KW * EOL * USABLE + 2 * 0.12   # usable bloom power (all ends as heat) + 2 crew, unshaded bloom
 V_BUS = 160.0                      # V, iss_eps primary
 J_CU = 3.0                         # A/mm², EST: copper in a pressurised, ventilated cabin
 SEG_VOL = math.pi * R_SHELL ** 2 * 2.9

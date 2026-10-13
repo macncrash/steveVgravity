@@ -2,60 +2,69 @@
 
 **Question:** do the blooms power the station, and can the radiators get rid of the heat, at every launch?
 
-**Answer:** the radiators are fine throughout; power is short.
-- **Full station:** 198 kW orbit-average usable at end of life (233 kW new) against 357 kW at ISS's power density. That is 61 W/m³, 56 % of ISS's 109 W/m³.
-- **Launch 1 has no power at all.** The hub and the docking pod carry no bloom. The first flight needs its own arrays, as ISS's first truss segment (P6) did.
-- **Shadowing costs 7 % of the bloom area at full bloom** (7 % with the New Shuttle docked), almost all of it on three far-side blooms that sit behind other pods.
-- **Batteries:** riding through a 36 min eclipse at full load needs ≈3.4 t of batteries in all, now carried in MASS_BUDGET.md.
+**Answer:** yes, with Ø17 m blooms, a bloom on the hub, and 4.5 m radiator fins (the Ø12 m blooms, no hub array and 3 m fins of the first pass fell short; see the history below).
+- **Full station:** 413 kW orbit-average usable at end of life (486 kW new) against 357 kW at ISS's power density: 127 W/m³, 116 % of ISS's 109 W/m³.
+- **Launch 1 has power now.** The hub carries its own bloom on a 37.6 m mast in the widest gap between pods, as ISS's first truss segment (P6) did. It gives ≈39 kW usable at end of life and stays on as the hub's own supply.
+- **Every launch is in surplus except launch 1**: 39 kW against 41 kW (95 %), and launch 1 flies uncrewed.
+- **Radiators keep a margin at every launch:** 1.04× or better at 275 K (1.18× at full bloom).
+- **Shadowing costs 11 % of the bloom area at full bloom** (11 % with the New Shuttle docked), mostly on far-side blooms behind other pods. The hub bloom is never shaded.
+- **Batteries:** riding through a 36 min eclipse at full load needs ≈7.1 t of batteries in all, carried in MASS_BUDGET.md.
 
 ## Assumptions
 
 - **Attitude:** sun held on +X, as in the STEVE model. Every bloom faces the sun, every radiator fin is edge-on to it, and shadowing changes only as pods are added.
-- **Blooms:** 40 kW each in full sun when new (MASS_BUDGET.md); 0.85 × that at end of life (EST).
+- **Blooms:** Ø17 m, 80 kW each in full sun when new (354 W/m², ≈26 % cells, as the first pass's 40 kW on Ø12 m); 0.85 × that at end of life (EST). Each sits on a mast of radius + 1.5 m (10.0 m), as in Gravity.
 - **Orbit:** 92 min with 36 min of eclipse (worst case). Batteries carry the eclipse at 0.85 round trip (EST), so the usable continuous power is 0.569 × the sunlit array power.
 - **Demand:** ISS density, ≈109 W per m³ pressurized (≈100 kW over 916 m³). This is a heavy-science benchmark, not a requirement.
 - **Heat:** all usable power becomes heat, plus 2 crew per pod at 120 W (EST). Heat soaking in through the MLI is not counted.
-- **Radiators:** 73.1 m² of fin per pod (two 3 m × 12.2 m fins), both faces radiating. ε 0.92, α 0.14 (Z-93-class white), fin efficiency 0.9 (EST). Orbit-average view factor to Earth 0.7 for both faces together (EST). Net rejection per m² of fin: 298 W at 265 K, 372 W at 275 K, 455 W at 285 K.
+- **Radiators:** 109.6 m² of fin per pod (two 4.5 m × 12.2 m fins), both faces radiating. ε 0.92, α 0.14 (Z-93-class white), fin efficiency 0.9 (EST). Orbit-average view factor to Earth 0.7 for both faces together (EST). Net rejection per m² of fin: 298 W at 265 K, 372 W at 275 K, 455 W at 285 K.
 - **Shadowing:** the station drawn as seen from the sun at 50 mm per pixel, from the same tessellation as the renders (station_mesh.py, orbiter_mesh.py). Masts and spars are left out (see the code).
 
 ## Launch by launch
 
+Blooms include the hub's.
+
 | Launch | Pod | Blooms | Shaded | Usable, new (kW) | Usable, end of life (kW) | Demand at ISS density (kW) | Balance (kW) | Heat (kW) | Radiator capacity at 265 / 275 / 285 K (kW) |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
-| 1 | 0 | 0 | 0.0 % | 0 | 0 | 41 | -41 | 0 | 22 / 27 / 33 |
-| 2 | 9 | 1 | 0.0 % | 23 | 19 | 70 | -50 | 20 | 44 / 54 / 66 |
-| 3 | 1 | 2 | 0.0 % | 46 | 39 | 98 | -60 | 39 | 65 / 82 / 100 |
-| 4 | 10 | 3 | 14.2 % | 59 | 50 | 127 | -77 | 51 | 87 / 109 / 133 |
-| 5 | 2 | 4 | 10.6 % | 81 | 69 | 156 | -87 | 70 | 109 / 136 / 166 |
-| 6 | 11 | 5 | 8.5 % | 104 | 89 | 184 | -96 | 90 | 131 / 163 / 199 |
-| 7 | 3 | 6 | 7.1 % | 127 | 108 | 213 | -105 | 110 | 153 / 190 / 233 |
-| 8 | 7 | 7 | 6.1 % | 150 | 127 | 242 | -115 | 129 | 174 / 218 / 266 |
-| 9 | 4 | 8 | 5.3 % | 173 | 147 | 271 | -124 | 149 | 196 / 245 / 299 |
-| 10 | 8 | 9 | 6.6 % | 192 | 163 | 299 | -136 | 165 | 218 / 272 / 332 |
-| 11 | 5 | 10 | 7.6 % | 211 | 179 | 328 | -149 | 182 | 240 / 299 / 365 |
-| 12 | 6 | 11 | 6.9 % | 233 | 198 | 357 | -158 | 201 | 262 / 326 / 399 |
+| 1 | 0 | 1 | 0.0 % | 46 | 39 | 41 | -2 | 39 | 33 / 41 / 50 |
+| 2 | 9 | 2 | 0.0 % | 91 | 78 | 70 | +8 | 78 | 65 / 82 / 100 |
+| 3 | 1 | 3 | 0.0 % | 137 | 117 | 98 | +18 | 117 | 98 / 122 / 150 |
+| 4 | 10 | 4 | 7.6 % | 169 | 144 | 127 | +16 | 145 | 131 / 163 / 199 |
+| 5 | 2 | 5 | 6.1 % | 215 | 182 | 156 | +27 | 184 | 163 / 204 / 249 |
+| 6 | 11 | 6 | 8.9 % | 250 | 212 | 184 | +28 | 214 | 196 / 245 / 299 |
+| 7 | 3 | 7 | 7.6 % | 296 | 251 | 213 | +38 | 253 | 229 / 286 / 349 |
+| 8 | 7 | 8 | 6.7 % | 341 | 290 | 242 | +48 | 292 | 262 / 326 / 399 |
+| 9 | 4 | 9 | 7.2 % | 382 | 324 | 271 | +54 | 327 | 294 / 367 / 449 |
+| 10 | 8 | 10 | 9.4 % | 414 | 352 | 299 | +53 | 354 | 327 / 408 / 498 |
+| 11 | 5 | 11 | 11.3 % | 446 | 379 | 328 | +51 | 382 | 360 / 449 / 548 |
+| 12 | 6 | 12 | 11.3 % | 486 | 413 | 357 | +57 | 416 | 392 / 490 / 598 |
 
 ## Reading it
 
-- **Power is the binding constraint.** Each new pod adds 263 m³ and one bloom worth ≈19 kW usable at end of life; at ISS density that pod wants 29 kW. The hub and the docking pod add 41 kW of demand and no bloom.
-- **Ways to close it:**
-  - Larger blooms: Ø16.6 m instead of Ø12 m covers ISS density at end of life. Larger discs shade each other more, so this comes from the sweep below, not from scaling the area. Bloom centres sit ≈40 m apart, so the discs still clear each other physically. The mast must stay longer than the bloom radius: ≈9.8 m instead of 7.5 m (Gravity uses radius + 1.5 m).
-  - Better cells: ≈32 % triple-junction cells instead of ≈26 % gives about 1.2× per m².
-  - A hub array for launch 1 that stays on as the hub's own supply, as ISS's P6 did.
-  - Or accept a lower density: the station as drawn supports 61 W/m³, which is plenty for habitation-heavy use.
-- **Radiators have margin.** At 275 K the fins reject 326 kW against 201 kW of heat at full bloom (1.6×). If the blooms grow to close the power gap, the heat grows too, and the margin shrinks to about 0.9×.
-- **Batteries:** one eclipse at 198 kW takes 119 kWh. At 35 % depth of discharge and 100 Wh/kg that is ≈3.4 t (≈0.28 t per pod). MASS_BUDGET.md books 0.33 t on every bloom pod, sized for an unshaded bloom, so it holds a little margin.
-- **Shading falls on the far side.** Blooms whose pods point away from the sun sit behind the station, and their light passes the pods in front. The worst bloom keeps only 57 % of its area; blooms on the sunward side are unshaded. Fixes: a longer mast on the far-side pods, or a gimbal that offsets the disc out of the shadow.
+- **What each pod brings:** 263 m³, which wants 29 kW at ISS density, and one bloom worth ≈39 kW usable at end of life before shading. The hub and the docking pod want 41 kW and get the hub bloom's 39 kW.
+- **Why the hub bloom, not only bigger blooms:** without it launch 1 has no power at all, and the hub and docking pod's demand is a debt that the pod blooms only pay back after several launches. The sweep below shows it: every size up to the chosen one leaves some early launch short.
+- **Where the hub bloom goes:** the centre of the widest gap between three pods, near the equator (clear of the berthing lanes, which run above the docking pod's neighbours), as far off the sun line as possible (station_geometry.hub_bloom_dir). Gravity and STEVE compute it from the same pod directions.
+- **Other ways to buy the same power:** ≈32 % triple-junction cells instead of ≈26 % give about 1.2× per m², which would allow ≈Ø15.5 m blooms. Or accept a lower density for habitation-heavy use.
+- **Radiators:** the bigger blooms put more heat into the station, so the fins grew from 3 m to 4.5 m wide. At 275 K they reject 490 kW against 416 kW of heat at full bloom (1.18×). Running the loop warmer (285 K) gives 1.44×.
+- **Batteries:** one eclipse at 413 kW takes 248 kWh. At 35 % depth of discharge and 100 Wh/kg that is ≈7.1 t (≈0.59 t per bloom). MASS_BUDGET.md books 0.67 t on every bloom, sized for an unshaded bloom, so it holds a little margin.
+- **Shading falls on the far side.** Blooms whose pods point away from the sun sit behind the station. The worst bloom keeps only 65 % of its area; blooms on the sunward side are unshaded. Fixes: a longer mast on the far-side pods, or a gimbal that offsets the disc out of the shadow.
 
-## Bloom size sweep (full station, end of life)
+## Bloom size sweep (with the hub bloom, end of life)
 
-| Bloom Ø (m) | Shaded | Usable (kW) | At ISS density? |
-|---:|---:|---:|---|
-| 12 | 6.9 % | 198 | no |
-| 14 | 8.9 % | 264 | no |
-| 16 | 11.6 % | 335 | no |
-| 17 | 12.7 % | 373 | yes |
-| 18 | 13.7 % | 414 | yes |
+| Bloom Ø (m) | Shaded at full bloom | Usable at full bloom (kW) | Worst launch balance (kW) |
+|---:|---:|---:|---:|
+| 12 | 6.7 % | 217 | -140 |
+| 14 | 8.2 % | 290 | -66 |
+| 15 | 9.3 % | 329 | -27 |
+| 16 | 10.4 % | 370 | -7 |
+| 16.5 | 10.9 % | 391 | -4 |
+| 17 | 11.3 % | 413 | -2 |
+| 17.5 | 11.8 % | 436 | +0 |
+
+## History
+
+- **First pass (Ø12 m blooms, no hub bloom, 3 m fins):** 198 kW usable at full bloom against 357 kW (56 % of ISS density), every launch short, launch 1 with no power at all; the radiators had 1.6× margin.
+- **Now:** the numbers above. The station grew by the bigger arrays, masts, batteries and fins and by the hub bloom (MASS_BUDGET.md).
 
 ## Not modelled (never claimed)
 

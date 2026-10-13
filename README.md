@@ -21,9 +21,9 @@ the hub after every second launch. The default station has:
 
 - 12 pods
 - about 3,300 m³ pressurized (≈ 3× ISS)
-- 11 blooms at about 440 kW peak, 233 kW usable orbit-average (198 kW at end of life; [power and thermal](analysis/POWER_THERMAL.md))
+- 12 Ø17 m blooms (one on the hub, so launch 1 has power) at about 970 kW in full sun, 413 kW usable orbit-average at end of life after shading and eclipses: 116 % of ISS's power density ([power and thermal](analysis/POWER_THERMAL.md))
 - 12 launches
-- about 521 t ([mass budget](analysis/MASS_BUDGET.md))
+- about 534 t ([mass budget](analysis/MASS_BUDGET.md))
 
 These are order-of-magnitude estimates, not sized engineering. See [ROADMAP.md](ROADMAP.md).
 
@@ -33,11 +33,11 @@ These are order-of-magnitude estimates, not sized engineering. See [ROADMAP.md](
 |---|---|
 | `gravity/blowball_station.js` | The Gravity sim. In Gravity: **New** → paste the file → Run. |
 | `gravity/handoff.mjs` | Gravity → STEVE hand-off: runs the sim in Gravity's own engine ([gravity-mcp](https://holodeck1.ai/mcp/)) and writes `steve/blowball_station/pod_layout.py`. |
-| `gravity/blowball_layout.py` | Python port of the sim's layout and assembly order, kept as an independent check (agrees to < 2 mm). |
+| `gravity/blowball_layout.py` | Python port of the sim's layout and assembly order, kept as an independent check (agrees to < 3 mm). |
 | `steve/` | Source of the STEVE documents (station, orbiter, New Shuttle, flight segment, payload, Spacelab-7). Each folder's `steve.json` links the live document. |
 | `renders/` | Stills and videos. Open `renders/index.html`. |
 | `renders/tools/` | Render pipeline: headless sim recorder, a small mesh renderer, local tessellation of the STEVE geometry. |
-| `analysis/` | Mass budget ([MASS_BUDGET.md](analysis/MASS_BUDGET.md): 521 t, 42 t per launch) and the pod structural check ([STRUCTURAL.md](analysis/STRUCTURAL.md): STEVE static + modal with hand checks; the root flare), and power and thermal per launch ([POWER_THERMAL.md](analysis/POWER_THERMAL.md): radiators fine, power 56 % of ISS density), and the berthing ring ([BERTHING_RING.md](analysis/BERTHING_RING.md): a sealed Ø2.0 m passage, 20 bolts, self-mating utilities). |
+| `analysis/` | Mass budget ([MASS_BUDGET.md](analysis/MASS_BUDGET.md): 534 t, 43 t per launch) and the pod structural check ([STRUCTURAL.md](analysis/STRUCTURAL.md): STEVE static + modal with hand checks; the root flare), and power and thermal per launch ([POWER_THERMAL.md](analysis/POWER_THERMAL.md): every launch powered and cooled, 116 % of ISS density at full bloom), and the berthing ring ([BERTHING_RING.md](analysis/BERTHING_RING.md): a sealed Ø2.0 m passage, 20 bolts, self-mating utilities), and the berthing paths ([BERTHING_CLEARANCE.md](analysis/BERTHING_CLEARANCE.md): every segment of every launch replayed against the station and the docked Shuttle). |
 | `ROADMAP.md` | Where the project stands and what comes next. |
 
 ## Reproduce the renders

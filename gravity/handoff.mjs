@@ -4,7 +4,7 @@
 //
 // knobs.json is a Gravity snapshot (or any {key: value} object, or one with a `params` object); key=value
 // arguments override it. The sim is stepped by gravity-mcp's run_sim until the layout has relaxed, and its data
-// block (particles 0..128, see DATA in blowball_station.js) is read back and written as a data-only Python module:
+// block (particles 0..129, see DATA in blowball_station.js) is read back and written as a data-only Python module:
 // DIRS (unit vectors, STEVE frame: Z = docking axis) and ORDER (assembly sequence).
 //
 // The server is started with npx from holodeck1.ai unless GRAVITY_MCP points at a local server.mjs.
@@ -79,6 +79,8 @@ try {
     return best;
   });
   if (new Set(order).size !== n) throw new Error(`ORDER is not a permutation: ${order}`);
+  const hbRow = P[2 * MAXP + 1];
+  const hub = Math.hypot(...hbRow) > 0 ? toSteve(unit(hbRow)) : null;   // the hub bloom's direction, as Gravity chose it
 
   // ---- write the data module ----
   const f = (v) => v.toFixed(5).padStart(9);
@@ -92,6 +94,7 @@ DIRS = [   # unit vectors, STEVE frame (Z = docking axis); DIRS[0] = pod 0
 ${dirs.map((d) => `    (${toSteve(d).map(f).join(', ')}),`).join('\n')}
 ]
 ORDER = ${JSON.stringify(order)}   # pod flown at each launch; ORDER[0] = 0 flies with the hub
+HUB_BLOOM = ${hub ? `(${hub.map(f).join(', ')})` : 'None'}   # the hub bloom's direction, as Gravity chose it
 `;
   fs.writeFileSync(out, py);
   console.log(`wrote ${out}: ${n} pods, order ${order.join(' ')}`);

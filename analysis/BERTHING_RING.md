@@ -41,11 +41,11 @@ Everything mates by itself when the bolts drive, as on the ISS truss segments: n
 
 | Line | Sized for | Connector |
 |---|---|---|
-| Power A / Power B (side plates) | 40 kW each, the bloom's full output in sun, at 160 V DC: 250 A per bus, ≈83 mm² of copper per pole. Either bus alone carries everything. | self-mating power pins, as the ISS truss UMAs |
+| Power A / Power B (side plates) | 80 kW each, the bloom's full output in sun, at 160 V DC: 502 A per bus, ≈167 mm² of copper per pole. Either bus alone carries everything. | self-mating power pins, as the ISS truss UMAs |
 | Data (side plates, with power) | 2 × fibre pairs per bus (Ethernet), plus a hard-wired bolt-and-latch status loop | self-mating fibre ferrules |
 | Air (top plate) | one pod's air (263 m³) to the hub once an hour (EST): 73 L/s, a Ø152 mm supply and a return duct at 4 m/s | IMV-style valve on each face; works with the hatch shut |
-| Water (bottom plate) | the pod's 19.6 kW to the heat exchanger at 10 K rise: 0.47 kg/s, Ø24 mm supply + return at 1 m/s | dry-break quick disconnects |
-| Ammonia (outer rim, blue) | the same 19.6 kW out to the radiator fins, two loops: 0.28 kg/s in all, Ø16 mm lines per loop | two umbilical mating adapters between latches, outside the pressure seal: a leak can't reach the cabin |
+| Water (bottom plate) | the pod's 39.1 kW to the heat exchanger at 10 K rise: 0.93 kg/s, Ø34 mm supply + return at 1 m/s | dry-break quick disconnects |
+| Ammonia (outer rim, blue) | the same 39.1 kW out to the radiator fins, two loops: 0.55 kg/s in all, Ø23 mm lines per loop | two umbilical mating adapters between latches, outside the pressure seal: a leak can't reach the cabin |
 
 ## Berthing sequence (one joint)
 
@@ -74,4 +74,4 @@ Everything mates by itself when the bolts drive, as on the ISS truss segments: n
 - **iss_truss:** NASA: ISS truss segments are joined by the Segment-to-Segment Attach System; their Umbilical Mating Adapters connect power, data and ammonia lines by themselves when the bolts drive
 - **iss_imv:** NASA: ISS modules exchange air through Intermodule Ventilation (IMV) ducts and valves at the hatches
 - **structural:** STRUCTURAL.md / pod_beam_check.py: 133 kN·m docking moment + 33 kN·m from 0.05 m/s² at the pod root
-- **power:** POWER_THERMAL.md: 40 kW per bloom new, 0.85 at end of life, 0.569 usable through the eclipse
+- **power:** POWER_THERMAL.md: a bloom's power new, 0.85 at end of life, 0.569 usable through the eclipse

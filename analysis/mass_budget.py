@@ -12,6 +12,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "renders", "tools", "station"))
 import station_geometry as G  # noqa: E402  (same layout + order as the STEVE design)
 from berthing_ring import N_BOLT, bulkhead  # noqa: E402  (BERTHING_RING.md: the joint and the bulkhead)
+from params import bloom_d, mast, rad_w  # noqa: E402
+from power_thermal import EOL, T_ECL, DOD, WH_PER_KG, USABLE, bloom_kw  # noqa: E402  (POWER_THERMAL.md)
 
 SOURCES = {
     "spacelab": "ESA: Spacelab-1 pressure module 8,145 kg (two 2.7 m segments + two end cones, outfitted)",
@@ -21,6 +23,12 @@ SOURCES = {
     "ultraflex": "NASA JPL ST8: UltraFlex-175, 175 W/kg BOL",
     "cbm": "NASA NTRS 20100001671: CBM, 16 powered bolts preloaded to ≈84.5 kN (19 kip)",
 }
+
+BLOOM_W = bloom_kw(bloom_d) * 1000                   # W in full sun, new
+FIN_M2 = 0.6 * G.pod_len / 1000 * rad_w / 1000          # one radiator fin (station_mesh, radiators.py)
+GIMBAL_KG, MAST_KG_M = 270, 33.0                        # EST: the old 520 kg for a 7.5 m mast and its gimbal, split
+HUB_MAST_M = (G.r_cone + mast - G.hub_r) / 1000          # the hub bloom's mast: hub surface to bloom centre
+BATT_KG = round(bloom_kw(bloom_d) * EOL * USABLE * T_ECL / 60 / DOD / WH_PER_KG * 1000)
 
 # ---------------- one flight segment (2.7 m Spacelab shell + two berthing flanges) ----------------
 SEGMENT = [
@@ -36,19 +44,27 @@ SEGMENT = [
 POD_EXTRA = [
     ("End cone", 800, "spacelab: cone share"),
     ("Stalk: 6.25 m pressurized tunnel Ø1.2 m + two berthing rings (EST)", 1500, "EST"),
-    ("Radiators: 2 fins × 34 m² at 7 kg/m² + pumps and plumbing", 2 * 34 * 7 + 300, "radiator"),
-    ("Solar bloom: 40 kW BOL array at 175 W/kg + 7.5 m mast + 2-axis gimbal", round(40000 / 175) + 520, "ultraflex + EST mast/gimbal"),
-    ("Batteries: one 36 min eclipse at the bloom's usable end-of-life power, 35 % DOD, 100 Wh/kg (EST)",
-     round(40 * 0.85 * 56 / (56 + 36 / 0.85) * 36 / 60 / 0.35 / 100 * 1000), "EST, as POWER_THERMAL.md (unshaded bloom)"),
+    (f"Radiators: 2 fins × {FIN_M2:.0f} m² at 7 kg/m² + pumps and plumbing", round(2 * FIN_M2 * 7) + 300, "radiator"),
+    (f"Solar bloom: Ø{bloom_d / 1000:.0f} m, {BLOOM_W / 1000:.0f} kW BOL array at 175 W/kg + {mast / 1000:.1f} m mast "
+     "+ 2-axis gimbal", round(BLOOM_W / 175 + GIMBAL_KG + MAST_KG_M * mast / 1000), "ultraflex + EST mast/gimbal"),
+    (f"Batteries: one {T_ECL:.0f} min eclipse at the bloom's usable end-of-life power, {DOD * 100:.0f} % DOD, "
+     f"{WH_PER_KG:.0f} Wh/kg (EST)", BATT_KG, "EST, as POWER_THERMAL.md (unshaded bloom)"),
 ]
 DOCKING_POD_EXTRA = [("End cone", 800, "spacelab"), ("Stalk (EST)", 1500, "EST"),
-                     ("Radiators", 2 * 34 * 7 + 300, "radiator"), ("Docking adapter + NDS ring (EST)", 900, "EST")]
+                     ("Radiators", round(2 * FIN_M2 * 7) + 300, "radiator"), ("Docking adapter + NDS ring (EST)", 900, "EST")]
 HUB = [
     ("6 m pressure sphere, MMOD shield (113 m² × ~25 kg/m², EST)", 2850, "EST"),
     ("12 berthing collars (EST)", 12 * 400, "EST"),
     ("Attitude control: 4 control moment gyros (EST, ISS-class)", 1100, "EST"),
     ("Propulsion module dry + 3 t propellant (EST)", 6000, "EST"),
-    ("Core avionics, life support, batteries + temporary arrays (EST)", 4000, "EST"),
+    ("Core avionics and life support (EST)", 3500, "EST: was 4 t with temporary arrays, now replaced by the hub bloom"),
+]
+HUB_BLOOM = [   # the hub's own bloom (POWER_THERMAL.md): flies with launch 1, off-centre in the widest gap between pods
+    (f"Hub bloom: Ø{bloom_d / 1000:.0f} m, {BLOOM_W / 1000:.0f} kW BOL array at 175 W/kg + 2-axis gimbal",
+     round(BLOOM_W / 175 + GIMBAL_KG), "ultraflex + EST gimbal"),
+    (f"Hub bloom mast: {HUB_MAST_M:.1f} m truss at 1.5 × a pod mast's {MAST_KG_M:.0f} kg/m (EST)",
+     round(1.5 * MAST_KG_M * HUB_MAST_M), "EST"),
+    ("Hub bloom batteries, as a pod's (EST)", BATT_KG, "EST, as POWER_THERMAL.md"),
 ]
 
 
@@ -59,7 +75,7 @@ def total(rows):
 seg = total(SEGMENT)
 pod = 7 * seg + total(POD_EXTRA)
 pod0 = 7 * seg + total(DOCKING_POD_EXTRA)
-hub = total(HUB)
+hub = total(HUB) + total(HUB_BLOOM)
 station = hub + pod0 + 11 * pod
 seg_vol = math.pi * 2.03 ** 2 * 2.9
 station_vol = 12 * 7 * seg_vol + 4 / 3 * math.pi * 3 ** 3
@@ -78,7 +94,10 @@ def com_by_launch():
     out = []
     for L in range(1, 13):
         built = G.ORDER[:L]
-        m, cm = hub, [0.0, 0.0, 0.0]
+        m = hub
+        # the hub bloom's array and mast sit off-centre; its batteries and the rest of the hub at the centre
+        hb = [(HUB_BLOOM[0][1], G.r_cone + mast), (HUB_BLOOM[1][1], (G.hub_r + G.r_cone + mast) / 2)]
+        cm = [sum(kg * G.HUB_BLOOM[k] * r for kg, r in hb) for k in range(3)]
         for q in built:
             D = G.DIRS[q]
             for j in range(7):
@@ -88,8 +107,8 @@ def com_by_launch():
             extra = DOCKING_POD_EXTRA if q == 0 else POD_EXTRA
             # radius of each extra item, in the order listed: end cone, stalk, radiators, bloom / docking adapter,
             # batteries (in the end cone, at the foot of the mast)
-            radii = [G.r_tip + 650, (G.hub_r + G.r0) / 2, G.r0 + 0.65 * G.pod_len,
-                     G.r_cone + 550 if q == 0 else G.r_cone + 7500, G.r_tip + 650]
+            radii = [G.r_tip + 650, (G.hub_r + G.r0) / 2, G.fin_mid(q),
+                     G.r_cone + 550 if q == 0 else G.r_cone + mast, G.r_tip + 650]
             for (_, kg, _), r in zip(extra, radii):
                 for k in range(3):
                     cm[k] += kg * D[k] * r
@@ -123,7 +142,7 @@ def report():
         "",
         "## Hub",
         "",
-        "| Item | kg | Basis |", "|---|---:|---|", table(HUB), f"| **Hub total** | **{hub:,}** | |",
+        "| Item | kg | Basis |", "|---|---:|---|", table(HUB), table(HUB_BLOOM), f"| **Hub total** | **{hub:,}** | |",
         "",
         "## Station",
         "",
@@ -135,7 +154,7 @@ def report():
         "",
         "### What this changes",
         "",
-        f"- **The New Shuttle must lift ~{pod / 1000:.0f} t to station orbit, not 32 t.** That is about 2.6× the original "
+        f"- **The New Shuttle must lift ~{pod / 1000:.0f} t to station orbit, not 32 t.** That is about {pod / 16000:.1f}× the original "
         "Shuttle's ~16 t to ISS orbit. The vehicle needs Starship-class lift, or the pod has to be split across two flights.",
         f"- Launch 1 (hub + docking pod) is about {(hub + pod0) / 1000:.0f} t: Starship-class.",
         "",

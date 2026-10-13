@@ -23,6 +23,11 @@ plate. A conical **flare** between stalk and pod fixes it, the way a dandelion s
   **EST**) plus a 0.05 m/s² lateral station acceleration on the whole pod. That acceleration is ~50× a typical ISS
   reboost, so it is conservative.
 
+**Since these studies (2026-10-13):** the pod grew to 42,794 kg (+3.7 %) with the berthing ring's bulkheads and
+batteries and the Ø17 m bloom (POWER_THERMAL.md). Not re-run: the acceleration case scales with mass (≈ +4 % stress),
+the docking case doesn't, and the first mode drops by about √(1/1.037), ≈ 2 %. The bloom's mass sits beyond the
+modelled tip, so the real drop is a little more; re-run the modal study before trusting it within 5 %.
+
 ## Results (STEVE, 0.1 m quadratic tetrahedra)
 
 | | Flat root bulkhead (rev 2) | **Flared joint (rev 4)** | Hand check (`pod_beam_check.py`) |

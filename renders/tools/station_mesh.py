@@ -15,6 +15,7 @@ import station_geometry as G  # noqa: E402
 from params import (bloom_d, cone_len, cone_r, hub_r, mast, pod_r, rad_w, seg_len, segments,  # noqa: E402
                     tunnel_r)
 
+HUB_MAST_R = 400   # mm: the hub bloom's mast is 4x as long as a pod's, so it is stiffer (a truss in reality)
 COL = {
     "hub": "#eceae3", "collar": "#a7adb5", "tunnel": "#d9a441", "pod": "#efece4", "flange": "#a7adb5",
     "dock": "#a7adb5", "disc": "#1b2f6e", "spar": "#e9edf2", "mast": "#8e959e", "fin": "#f5f6f7", "strut": "#a7adb5",
@@ -108,6 +109,8 @@ def station_bodies(built, with_hub=True):
         out.append((hub_sphere(), COL["hub"], 0.1))
         for D in G.DIRS:                                                       # the hub carries all 12 collars
             out.append((frustum(tunnel_r + 300, tunnel_r + 300, 450, at(D, hub_r - 200), D), COL["collar"], 0.3))
+        # the hub's own bloom, in the widest gap between pods: it flies with launch 1 (G.hub_bloom_dir)
+        out += bloom(G.HUB_BLOOM, hub_r - 200, G.r_cone + mast - hub_r + 200, HUB_MAST_R)
     for i in sorted(built):
         D = G.DIRS[i]
         out.append((frustum(tunnel_r, tunnel_r, G.r0 - hub_r + 250, at(D, hub_r - 200), D, 24), COL["tunnel"], 0.2))
@@ -119,27 +122,32 @@ def station_bodies(built, with_hub=True):
         # radiators: two fins edge-on to the sun, plus struts
         d, w, n = G.edge_on_frame(D)
         L = 0.6 * G.pod_len
-        mid = G.r0 + 0.65 * G.pod_len
+        mid = G.fin_mid(i)
         off = pod_r + 400 + rad_w / 2
         for sgn in (1, -1):
             centre = tuple(D[k] * mid + w[k] * sgn * off for k in range(3))
             out.append((box(centre, (d, w, n), (L, rad_w, 80)), COL["fin"], 0.5))
             for frac in (0.45, 0.85):
-                base = tuple(D[k] * (G.r0 + frac * G.pod_len) + w[k] * sgn * (pod_r - 50) for k in range(3))
+                base = tuple(D[k] * (mid + (frac - 0.65) * G.pod_len) + w[k] * sgn * (pod_r - 50) for k in range(3))
                 out.append((frustum(90, 90, 450, base, tuple(w[k] * sgn for k in range(3)), 12), COL["strut"], 0.3))
         if i == 0:   # docking adapter + NDS ring
             out.append((frustum(1000, 1000, 1100, at(D, G.r_cone), D), COL["pod"], 0.05))
             out.append((frustum(1100, 1100, 200, at(D, G.r_cone + 1100), D), COL["dock"], 0.4))
             out.append((frustum(850, 850, 300, at(D, G.r_cone + 1300), D), COL["dock"], 0.4))
             continue
-        # bloom: mast, gimbal, 24-gore disc face-on to the sun, 12 spars
-        R = bloom_d / 2
-        c = at(D, G.r_cone + mast)
-        out.append((frustum(250, 250, mast, at(D, G.r_cone), D, 16), COL["mast"], 0.3))
-        out.append((frustum(450, 450, 500, tuple(c[k] - G.SUN[k] * 500 for k in range(3)), G.SUN, 24), COL["mast"], 0.3))
-        out.append((prism_polygon(c, G.SUN, R, 24, 60), COL["disc"], 0.9))
-        for g in range(12):
-            a = 2 * math.pi * g / 12
-            uu = (0.0, math.cos(a), math.sin(a))
-            out.append((frustum(70, 70, R, tuple(c[k] - G.SUN[k] * 70 for k in range(3)), uu, 8), COL["spar"], 0.3))
+        out += bloom(D, G.r_cone, mast)
+    return out
+
+
+def bloom(D, r_from, length, mast_r=250):
+    """A bloom on a mast along D from radius r_from: mast, gimbal, 24-gore disc face-on to the sun, 12 spars."""
+    at, R, out = G.at, bloom_d / 2, []
+    c = at(D, r_from + length)
+    out.append((frustum(mast_r, mast_r, length, at(D, r_from), D, 16), COL["mast"], 0.3))
+    out.append((frustum(450, 450, 500, tuple(c[k] - G.SUN[k] * 500 for k in range(3)), G.SUN, 24), COL["mast"], 0.3))
+    out.append((prism_polygon(c, G.SUN, R, 24, 60), COL["disc"], 0.9))
+    for g in range(12):
+        a = 2 * math.pi * g / 12
+        uu = (0.0, math.cos(a), math.sin(a))
+        out.append((frustum(70, 70, R, tuple(c[k] - G.SUN[k] * 70 for k in range(3)), uu, 8), COL["spar"], 0.3))
     return out

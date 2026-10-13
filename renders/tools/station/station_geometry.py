@@ -18,6 +18,16 @@ r_cone = r_tip + cone_len                  # end of the Spacelab end cone
 r_port = r_cone + 1600                     # pod 0: docking adapter + NDS ring face
 
 
+FIN0_DROP = 3000           # mm: the docking pod's fins sit this much nearer the hub than the others. Pod 0's edge-on
+                           # plane is the XZ plane, right under the Shuttle's bay, and the arm's end effector dips
+                           # into it as each segment lifts out (berthing_clearance.py)
+
+
+def fin_mid(i):
+    """Radius of the middle of pod i's radiator fins (they cover 60 % of the pod)."""
+    return r0 + 0.65 * pod_len - (FIN0_DROP if i == 0 else 0)
+
+
 def at(d, r):
     return tuple(c * r for c in d)
 
@@ -41,6 +51,34 @@ def edge_on_frame(d):
     return d, w, n
 
 
+def hub_bloom_dir(dirs):
+    """Where the hub's own bloom points (it flies with launch 1, which has no other power, as ISS's P6 array did).
+
+    The centre of a gap between three pods (a face of the pods' convex hull), chosen among the widest gaps near the
+    equator (|z| < 0.5: clear of the berthing lanes, which run above the docking pod's ring of neighbours), as far
+    off the sun line as possible (largest |y|, so it shades little and is shaded little), sunward first, +y on a tie.
+    Values are rounded to 0.01 before comparing, so float noise between Gravity and Python can't flip the choice.
+    """
+    n, faces = len(dirs), []
+    for i in range(n):
+        for j in range(i + 1, n):
+            for k in range(j + 1, n):
+                a, b, c = dirs[i], dirs[j], dirs[k]
+                nrm = cross(tuple(b[m] - a[m] for m in range(3)), tuple(c[m] - a[m] for m in range(3)))
+                side = [sum(nrm[m] * (dirs[q][m] - a[m]) for m in range(3)) for q in range(n) if q not in (i, j, k)]
+                if all(s <= 1e-9 for s in side) or all(s >= -1e-9 for s in side):
+                    g = unit(tuple(a[m] + b[m] + c[m] for m in range(3)))
+                    gap = min(math.degrees(math.acos(max(-1.0, min(1.0, sum(g[m] * d[m] for m in range(3))))))
+                              for d in dirs)
+                    faces.append((g, gap))
+    widest = max(gap for _, gap in faces)
+    pick = [g for g, gap in faces if gap > widest - 1.0 and abs(g[2]) < 0.5] or [g for g, gap in faces if gap > widest - 1.0]
+    return max(pick, key=lambda g: (round(abs(g[1]), 2), round(g[0], 2), g[1] > 0))
+
+
+HUB_BLOOM = hub_bloom_dir(DIRS)          # direction of the hub's own bloom
+
+
 
 ORB_DOCK_X, ORB_DOCK_Z = 8300, 3100
 BAY_AXIS_Z = 375
@@ -52,9 +90,10 @@ def orbiter_to_station(p):
     return (p[0] - ORB_DOCK_X, -p[1], -p[2] + r_port + ORB_DOCK_Z)
 
 # ---- berthing path (appended to station_geometry.py) ----
-LIFT = 3400                # mm out of the bay (bay opens toward -Z): clears the sills, still under the open doors
+LIFT = 3900                # mm out of the bay (bay opens toward -Z): the segment's underside clears the stowed
+                           # Canadarm on the side step (berthing_clearance.py; 3400 left it 3 cm short)
 SIDE = 12000               # mm sideways: clear of the docking pod, and wide enough to pass outside the OMS pods and tail
-RC = 50000                 # mm swing radius, horizontal: outside every bloom (blooms reach ~44 m)
+RC = 50000                 # mm swing radius, horizontal: outside every bloom (Ø17 m blooms reach ~49 m)
 
 
 def rotate(axis, deg, v):

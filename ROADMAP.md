@@ -10,18 +10,18 @@ are berthed one at a time, outward from the hub, until the station blooms.
   mass on the hub after every second launch.
 - **Flowers open last.** The solar bloom and the radiators unfold only after the pod is complete.
 
-## Where we are (2026-10-12)
+## Where we are (2026-10-13)
 
 | Piece | Where | Status |
 |---|---|---|
-| Station layout: pod directions packed on a sphere | Gravity `blowball_station.js` → `gravity/handoff.mjs` (gravity-mcp) → STEVE `pod_layout.py` | ✅ STEVE builds from Gravity's own output; the Python port `blowball_layout.py` agrees to < 2 mm |
+| Station layout: pod directions packed on a sphere | Gravity `blowball_station.js` → `gravity/handoff.mjs` (gravity-mcp) → STEVE `pod_layout.py` | ✅ STEVE builds from Gravity's own output; the Python port `blowball_layout.py` agrees to < 3 mm; the hub bloom's direction is handed over too and checked |
 | Assembly order and stage (launch N) | Gravity `order` / `launch` / `timelapse` knobs; STEVE `order` / `launches` params | ✅ identical orders in both |
-| Station v2: 12 × 7-segment pods, 12 m solar blooms, radiators | [STEVE Blowball Station](https://stevecad.studio/?document=286c0cf5-6549-4e47-bcd1-7aaa2fd70bf3) | ✅ builds |
-| Shuttle orbiter with ODS + NASA Docking System | [STEVE Orbiter](https://stevecad.studio/?document=cf4b87db-20b5-41d4-b3a0-480b68700e5c) | ✅ linked, docks on pod 0 |
+| Station v2: 12 × 7-segment pods, Ø17 m solar blooms (+ one on the hub), 4.5 m radiators | [STEVE Blowball Station](https://stevecad.studio/?document=286c0cf5-6549-4e47-bcd1-7aaa2fd70bf3) | ✅ builds |
+| Shuttle orbiter with ODS + NASA Docking System | [STEVE Orbiter](https://stevecad.studio/?document=cf4b87db-20b5-41d4-b3a0-480b68700e5c) | ✅ rev 4 (stowed Canadarm outboard of the segments), linked, docks on pod 0 |
 | Berthable flight segment: hatched ends, berthing ring (sealed passage, bolts, self-mating utilities), trunnions, grapple | [STEVE Flight Segment](https://stevecad.studio/?document=767beb53-1509-49c3-8f71-a72fa61ab1a8) | ✅ rev 5; ring sized in [BERTHING_RING.md](analysis/BERTHING_RING.md) |
 | One-pod payload: 7 segments in a 21.5 m bay | [STEVE Payload](https://stevecad.studio/?document=bd0b235b-73df-447d-9f4d-2a5a7854ce1e) | ✅ geometry only |
 | New Shuttle: orbiter with `stretch` (8.0 m → 26.3 m bay) | [STEVE Orbiter](https://stevecad.studio/?document=cf4b87db-20b5-41d4-b3a0-480b68700e5c) / [stretched](https://stevecad.studio/?document=7d50bbe0-60ca-461c-adda-05d48c078204) | ✅ |
-| Berthing animation (launch N): 7 segments, arm path lift → side → out → swing → in | STEVE station, animation `berthing` | ✅ paths checked offline for launches 2–12, ≥ 0.32 m clear; STEVE's full 48-sample sweep (rev 26, with the berthing ring) finds no collision between real parts (only the hidden motion carriers touch) |
+| Berthing animation (launch N): 7 segments, arm path lift → side → out → swing → in | STEVE station, animation `berthing` | ✅ every segment of launches 2–12 replayed offline ([BERTHING_CLEARANCE.md](analysis/BERTHING_CLEARANCE.md)): ≥ 0.28 m clear outside the bay; STEVE's full 48-sample sweep (rev 29: 17 m blooms, hub bloom) finds no collision between real parts (only the hidden motion carriers touch) |
 | Renders: 12 launch stages, berthing video, full-bloom hero shots, Gravity time-lapse | `renders/index.html` | ✅ |
 
 ## What the "new shuttle" must do (derived from the payload layout)
@@ -29,7 +29,7 @@ are berthed one at a time, outward from the hub, until the station blooms.
 | | Original Shuttle | New Shuttle needed | Why |
 |---|---|---|---|
 | Payload bay | 4.6 × 18.3 m | **4.6 × 26.3 m** | ODS (3 m) + 7 × 2.9 m segments + gaps, and the last segment must lift out clear of the OMS pod noses |
-| Payload to station orbit | ~16 t | **~42 t** | one pod: 7 × 5.39 t segments + stalk, cone, radiators, bloom, batteries ([MASS_BUDGET.md](analysis/MASS_BUDGET.md)) |
+| Payload to station orbit | ~16 t | **~43 t** | one pod: 7 × 5.39 t segments + stalk, cone, radiators, bloom, batteries ([MASS_BUDGET.md](analysis/MASS_BUDGET.md)) |
 | Docking | ODS / APAS | ODS + **NDS (IDSS)** | modern standard; already in the model |
 | Flights per pod | n/a | **1** | one launch = one pod |
 
@@ -52,19 +52,25 @@ are berthed one at a time, outward from the hub, until the station blooms.
 
 ### 2. Make it believable (engineering numbers) ✅ (2026-10-12)
 
-- ✅ Mass properties per stage: [analysis/MASS_BUDGET.md](analysis/MASS_BUDGET.md). 5.39 t/segment, 41.9 t/pod (batteries included),
-  521 t station; the CoM returns to the hub after every pair. The New Shuttle must lift ~42 t.
-- ✅ Power and thermal balance per stage: [analysis/POWER_THERMAL.md](analysis/POWER_THERMAL.md). The radiators
-  have 1.6× margin. Power is short: 198 kW usable at end of life against 357 kW at ISS's power density (56 %).
-  Launch 1 has no bloom, so it needs its own arrays. Three far-side blooms lose up to 43 % to shading. Ø16.6 m blooms
-  would close the gap. Batteries (≈0.33 t per bloom pod) are now in the mass budget.
+- ✅ Mass properties per stage: [analysis/MASS_BUDGET.md](analysis/MASS_BUDGET.md). 5.39 t/segment, 42.8 t/pod (batteries included),
+  534 t station; the CoM returns to the hub after every pair. The New Shuttle must lift ~43 t.
+- ✅ Power and thermal balance per stage: [analysis/POWER_THERMAL.md](analysis/POWER_THERMAL.md). The first pass
+  was short (198 kW against 357 kW at ISS's power density, and nothing at all at launch 1). **Closed (2026-10-13):**
+  Ø17 m blooms (80 kW new each), plus the hub's own bloom on a 37.6 m mast in the widest gap between pods (as
+  ISS's P6 array powered its first year). 413 kW usable at full bloom (116 % of ISS density); every launch in
+  surplus except uncrewed launch 1 at 95 %. The fins grew to 4.5 m to keep up with the heat (1.18× at 275 K).
+  Batteries (0.67 t per bloom) are in the mass budget.
+- ✅ Berthing clearance: [analysis/BERTHING_CLEARANCE.md](analysis/BERTHING_CLEARANCE.md) replays every segment of
+  every launch. It found two clashes the earlier capsule check had missed, neither caused by the bigger blooms: the
+  stowed Canadarm sat inside the payload envelope (moved outboard, orbiter rev 4; the lift is now 3.9 m), and the
+  arm's end effector dipped into the docking pod's fins (they now sit 3 m nearer the hub).
 - ✅ Structural check of a pod on its stalk: [analysis/STRUCTURAL.md](analysis/STRUCTURAL.md). A flat root
   bulkhead bends like a plate (77 MPa, 136 mm); a conical **flare** fixes it (17.8 MPa, 25.6 mm, first mode
   0.62 Hz, within 5 % of the hand check). The flare is now part of the station design.
 - ✅ Berthing ring: [analysis/BERTHING_RING.md](analysis/BERTHING_RING.md), STEVE Flight Segment rev 5. Every
   segment holds its own air behind two pressure-rated bulkheads (a bamboo node), so the joint seals only a Ø2.0 m
   passage: 20 bolts instead of 82, half the seal length, preload 2.7× the worst bolt load with the docking moment.
-  The 1.27 m hatch sits inside the seal; power (2 × 250 A at 160 V), data, air and water mate by themselves on four
+  The 1.27 m hatch sits inside the seal; power (2 × 500 A at 160 V with the 17 m blooms), data, air and water mate by themselves on four
   plates beside it, and the ammonia loops cross outside the seal on two umbilical adapters.
 
 ### 3. Make the bridge automatic
@@ -90,7 +96,7 @@ These are estimates, not sized engineering.
 | | |
 |---|---|
 | Launches | 12: 1 hub launch + 11 pod launches |
-| Pressurized volume | ~3,000 m³ (≈ 3× ISS) |
-| Solar | ~440 kW peak, ~250 kW orbit-average |
-| Mass | ~521 t ([MASS_BUDGET.md](analysis/MASS_BUDGET.md)) |
+| Pressurized volume | ~3,300 m³ (≈ 3× ISS) |
+| Solar | 12 blooms, ~970 kW in sun, ~413 kW usable orbit-average at end of life ([POWER_THERMAL.md](analysis/POWER_THERMAL.md)) |
+| Mass | ~534 t ([MASS_BUDGET.md](analysis/MASS_BUDGET.md)) |
 | Assembly time | ~1 week of berthing per launch; at a monthly flight rate, about a year to full bloom |

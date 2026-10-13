@@ -11,7 +11,7 @@ from station_geometry import r_port, BUILT, ARRIVING, ORB_DOCK_X, ORB_DOCK_Z, be
 
 # Blowball Station v2: built from the same knob values as the Gravity sim "Blowball Station"
 # (gravity/blowball_station.js). Change params.py to match the Gravity knobs and regenerate.
-#   hub sphere -> 12 pressurized stalks -> 7-segment Spacelab pods -> sun-tracking 12 m solar blooms
+#   hub sphere -> 12 pressurized stalks -> 7-segment Spacelab pods -> sun-tracking 17 m solar blooms (+ one on the hub)
 #   pod 0 points +Z and carries the docking port instead of a bloom.
 design = Design()
 design.add(hub)

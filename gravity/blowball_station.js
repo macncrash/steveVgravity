@@ -9,6 +9,7 @@
 //   achene (seed)               -> lab pod: N Spacelab segments end to end (default 7 = 18.9 m)
 //   pappus (fluff)              -> a big circular solar array on a gimbal mast, always face-on to the sun (+x)
 //   + two radiator fins per pod, edge-on to the sun; pod 0 (up, +y) is the docking pod with the Shuttle
+//   + the hub's own bloom on a long mast in the widest gap between pods (launch 1's power, like ISS's P6)
 // Pod directions are packed on the sphere by repulsion (Thomson k=1 … Tammes k→∞).
 // Red rings: at a pod root when two pods are too close, at a bloom rim when two blooms overlap.
 //
@@ -33,7 +34,7 @@ export const meta = {
     { key: 'reach', label: 'stalk length (m)', min: 2, max: 10, step: 0.1, default: 6 },
     { key: 'podR', label: 'pod radius (m)', min: 1, max: 3, step: 0.01, default: 2.03 },
     { key: 'segments', label: 'Spacelab segments / pod', min: 1, max: 7, step: 1, default: 7 },
-    { key: 'bloomD', label: 'solar bloom diameter (m)', min: 0, max: 20, step: 0.5, default: 12 },
+    { key: 'bloomD', label: 'solar bloom diameter (m)', min: 0, max: 20, step: 0.5, default: 17 },
     { key: 'clear', label: 'min clearance (m)', min: 0, max: 3, step: 0.1, default: 1 },
     { key: 'shuttle', label: 'Shuttle docked on pod 0', min: 0, max: 1, step: 1, default: 1, options: { no: 0, yes: 1 } },
     { key: 'rpm', label: 'spin (rpm)', min: 0, max: 6, step: 0.1, default: 0 },
@@ -42,17 +43,17 @@ export const meta = {
     { key: 'launch', label: 'launches flown (time-lapse off)', min: 0, max: 64, step: 1, default: 64 },
   ],
   doc: {
-    about: 'A dandelion blowball packs ~150–200 seeds on a domed receptacle so every stalk gets its own patch of sky. Here each seed is a 7-segment Spacelab laboratory (18.9 m, Ø4.06 m) on a pressurized stalk, and each pappus is a 12 m circular fan-fold solar array (UltraFlex-style) on a gimbal mast. Two pods whose roots sit at radius r0 and whose directions are θ apart are closest at their roots: 2·r0·sin(θ/2) — so the pod count is a Tammes problem. Default station: 12 pods ≈ 3,000 m³ pressurized (≈3× ISS), 11 blooms ≈ 11 × 40 kW ≈ 440 kW peak, ~250 kW orbit-average.',
+    about: 'A dandelion blowball packs ~150–200 seeds on a domed receptacle so every stalk gets its own patch of sky. Here each seed is a 7-segment Spacelab laboratory (18.9 m, Ø4.06 m) on a pressurized stalk, and each pappus is a 17 m circular fan-fold solar array (UltraFlex-style) on a gimbal mast; the hub carries one more on a long mast in the widest gap between pods, so the first launch has power. Two pods whose roots sit at radius r0 and whose directions are θ apart are closest at their roots: 2·r0·sin(θ/2) — so the pod count is a Tammes problem. Default station: 12 pods ≈ 3,300 m³ pressurized (≈3× ISS), 12 blooms ≈ 12 × 80 kW ≈ 970 kW peak, ~410 kW orbit-average after shading, eclipses and ageing (POWER_THERMAL.md in the repo).',
     howItWorks: 'Pod directions start on a Fibonacci (golden-angle) sphere or at seeded random points, then slide over the sphere under pairwise repulsion F ∝ 1/d^(k+1). The step shrinks over a fixed budget of 1200 iterations so the result is reproducible; the layout is then rotated so pod 0 points up (+y) and pod 1 lies in the x–y plane. Blooms track the sun along +x (a 2-axis gimbal at each mast); radiators stay edge-on to it. Spin turns the station about y: a pod at distance ρ from the axis feels ω²ρ.',
     integrator: 'projected gradient descent on the sphere, 6 iterations/frame, annealed step, 1200 iterations total',
     mapping: 'view units are metres scaled by 19/(station radius) so everything fits; y is up, the sun is +x. STEVE frame: X = x, Y = −z, Z = y (mm = m × 1000).',
     equations: [
       { label: 'pod clearance at the roots', latex: '2 r_0 \\sin(\\theta_{ij}/2) \\ge 2 r_{pod} + c,\\quad r_0 = r_{hub} + L_{stalk}' },
       { label: 'repulsion on the sphere', latex: '\\mathbf F_i = \\sum_{j\\ne i} \\frac{\\mathbf d_i - \\mathbf d_j}{|\\mathbf d_i - \\mathbf d_j|^{k+2}}' },
-      { label: 'bloom power (30 % cells, 85 % fill)', latex: 'P \\approx 1361\\,\\tfrac{W}{m^2} \\times 0.30 \\times 0.85 \\times \\tfrac{\\pi D^2}{4} \\approx 40\\,\\mathrm{kW}\\ (D = 12\\,\\mathrm{m})' },
+      { label: 'bloom power (30 % cells, 85 % fill)', latex: 'P \\approx 1361\\,\\tfrac{W}{m^2} \\times 0.30 \\times 0.85 \\times \\tfrac{\\pi D^2}{4} \\approx 79\\,\\mathrm{kW}\\ (D = 17\\,\\mathrm{m})' },
       { label: 'spin gravity', latex: 'g = \\omega^2 \\rho,\\quad \\omega = 2\\pi\\,\\mathrm{rpm}/60' },
     ],
-    assumptions: ['Pods are rigid cylinders on radial stalks; pod clearance is checked at the roots, bloom clearance between bloom centres.', 'Blooms are sun-tracking discs; shading between blooms is not computed.', 'Assembly: launch 1 = hub + axial docking pod; every later launch delivers one pod as 7 segments that are berthed one at a time from the hub outward, then its bloom and radiators unfold. The magenta cross is the centre of mass (hub 20 t, 4 t per segment, 1.5 t per bloom). Opposite pairs re-centre it after every second launch, like decussate leaves (mint, basil); the biggest-gap spiral is the sunflower rule.'],
+    assumptions: ['Pods are rigid cylinders on radial stalks; pod clearance is checked at the roots, bloom clearance between bloom centres.', 'The hub bloom sits at the centre of the widest gap between three pods (a face of their convex hull) near the equator, as far off the sun line as possible; STEVE picks it by the same rule (station_geometry.hub_bloom_dir).', 'Blooms are sun-tracking discs; shading between blooms is not computed.', 'Assembly: launch 1 = hub + axial docking pod; every later launch delivers one pod as 7 segments that are berthed one at a time from the hub outward, then its bloom and radiators unfold. The magenta cross is the centre of mass (hub 20 t, 4 t per segment, 1.5 t per bloom). Opposite pairs re-centre it after every second launch, like decussate leaves (mint, basil); the biggest-gap spiral is the sunflower rule.'],
     limitations: ['No structure, mass, life support or propulsion is modelled.', 'Sun-tracking blooms and a spinning station fight each other: with spin on, every gimbal must counter-rotate once per revolution.', '1 g at ~30 m needs ~5.5 rpm, above the ~2–4 rpm most people tolerate.'],
     references: [
       { label: 'Tammes problem', url: 'https://en.wikipedia.org/wiki/Tammes_problem' },
@@ -141,15 +142,55 @@ function canonical(d, n) {
   return out;
 }
 
+// The hub bloom's direction (keep in sync with STEVE's station_geometry.hub_bloom_dir, which works in the STEVE
+// frame X = x, Y = -z, Z = y): the centre of a face of the pods' convex hull, among the widest gaps (within 1°)
+// near the equator (|y| < 0.5), as far off the sun line as possible (largest |z|), sunward first (largest x), then
+// STEVE +Y (z < 0) on a tie. Values are rounded to 0.01 before comparing, as in Python.
+function hubBloomDir(v, n) {
+  const faces = [];
+  const P = (i) => [v[i * 3], v[i * 3 + 1], v[i * 3 + 2]];
+  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) for (let k = j + 1; k < n; k++) {
+    const a = P(i), b = P(j), c = P(k);
+    const e1 = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], e2 = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+    const nr = [e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]];
+    let pos = true, neg = true;
+    for (let q = 0; q < n && (pos || neg); q++) {
+      if (q === i || q === j || q === k) continue;
+      const sd = nr[0] * (v[q * 3] - a[0]) + nr[1] * (v[q * 3 + 1] - a[1]) + nr[2] * (v[q * 3 + 2] - a[2]);
+      if (sd > 1e-9) neg = false;
+      if (sd < -1e-9) pos = false;
+    }
+    if (!pos && !neg) continue;
+    let g = [a[0] + b[0] + c[0], a[1] + b[1] + c[1], a[2] + b[2] + c[2]];
+    const m = Math.hypot(g[0], g[1], g[2]); g = [g[0] / m, g[1] / m, g[2] / m];
+    let gap = 180;
+    for (let q = 0; q < n; q++) gap = Math.min(gap, Math.acos(Math.max(-1, Math.min(1, g[0] * v[q * 3] + g[1] * v[q * 3 + 1] + g[2] * v[q * 3 + 2]))) * 180 / Math.PI);
+    faces.push([g, gap]);
+  }
+  if (!faces.length) return null;
+  const widest = Math.max(...faces.map((f) => f[1]));
+  let pick = faces.filter((f) => f[1] > widest - 1 && Math.abs(f[0][1]) < 0.5);
+  if (!pick.length) pick = faces.filter((f) => f[1] > widest - 1);
+  const r2 = (x) => Math.round(x * 100) / 100;
+  const key = (g) => [r2(Math.abs(g[2])), r2(g[0]), g[2] < 0 ? 1 : 0];
+  let best = pick[0][0];
+  for (const [g] of pick) {
+    const kg = key(g), kb = key(best);
+    if (kg[0] > kb[0] || (kg[0] === kb[0] && (kg[1] > kb[1] || (kg[1] === kb[1] && kg[2] > kb[2])))) best = g;
+  }
+  return best;
+}
+
 // ---------------- particles ----------------
 const SEG = 2.7, CONE = 1.3, MAST_EXTRA = 1.5;            // Spacelab segment & end cone (m); mast = bloom radius + 1.5 m
+const RAD_W = 4.5, FIN0_DROP = 3.0;   // radiator fin width (m); the docking pod's fins sit 3 m nearer the hub (clear of the bay)
 const HUB = 1200, STALK = 30, POD = 280, BLOOM = 226, RAD = 96, RING = 40, BRING = 48, SHUTTLE = 2400;
 const PER = STALK + POD + BLOOM + RAD + RING + BRING, COMN = 60;
 // Data block (particles 0..DATA-1), read back with gravity-mcp's run_sim (particleCount = sample = 5000 → every
 // particle in order). Rows 0..63: pod q's direction; rows 64..127: the direction of the pod flown at launch r + 1;
-// row 128: (pods / 100, relax progress / 2, 0). Unused rows sit at the origin. Directions are in the canonical,
+// row 128: (pods / 100, relax progress / 2, 0); row 129: the hub bloom's direction. Unused rows sit at the origin. Directions are in the canonical,
 // un-spun frame at a fixed radius inside the hub, so they don't show; normalise to read them.
-const DATA = 2 * MAXP + 1, DATA_R = 0.9;
+const DATA = 2 * MAXP + 2, DATA_R = 0.9;
 const O_HUB = DATA, O_POD0 = O_HUB + HUB, O_SHUT = O_POD0 + MAXP * PER, O_COM = O_SHUT + SHUTTLE, O_END = O_COM + COMN;
 const M_HUB = 20, M_SEG = 4, M_BLOOM = 1.5;              // tonnes, for the centre-of-mass marker
 
@@ -243,9 +284,10 @@ export function create(ctx) {
   for (let i = 0; i < SHUTTLE; i++) if (black[i] && O_SHUT + i < total) { col[(O_SHUT + i) * 3] = 0.12; col[(O_SHUT + i) * 3 + 1] = 0.12; col[(O_SHUT + i) * 3 + 2] = 0.14; }
 
   let n = 0, k = 0, start = -1, seed = -1, relax = -1, it = 0, dirs = null, view = null, theta = 0, clock = 0;
+  let hbKey = '', hbDir = null, resets = 0;                              // hub bloom direction, cached per layout
   const reset = (p) => {
     n = Math.round(p.pods); k = p.k; start = p.start; seed = Math.round(p.seed); relax = p.relax;
-    dirs = startDirs(n, start, seed); it = 0;
+    dirs = startDirs(n, start, seed); it = 0; resets++;
   };
   const put = (i, x, y, z) => { if (i >= total) return; pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z; };
   const park = (from, count) => { for (let i = from; i < from + count; i++) put(i, 0, 0, 0); };
@@ -285,11 +327,19 @@ export function create(ctx) {
       if (q < n) put(MAXP + q, view[o * 3] * dr, view[o * 3 + 1] * dr, view[o * 3 + 2] * dr); else put(MAXP + q, 0, 0, 0);
     }
     put(2 * MAXP, n / 100, relax >= 0.5 ? (0.5 * it) / ITERS : 0.5, 0);
+    if (hbKey !== `${resets}:${it}`) { hbKey = `${resets}:${it}`; hbDir = n >= 4 ? hubBloomDir(view, n) : null; }  // only while relaxing
+    const hbData = hbDir;                                              // row 129 (written even with bloomD = 0)
+    if (hbData) put(2 * MAXP + 1, hbData[0] * dr, hbData[1] * dr, hbData[2] * dr); else put(2 * MAXP + 1, 0, 0, 0);
     // clash tests: pod roots, and bloom centres (blooms all face the sun, so they overlap when centres
     // projected onto the sun-facing plane are closer than a diameter and they sit at similar depth)
     const lim = (2 * p.podR + p.clear) / r0;
     const clash = new Uint8Array(n), bclash = new Uint8Array(n);
     const rb = rCone + mast;
+    const hb = R > 0 ? hbData : null;                                    // the hub bloom flies with pod 0
+    if (hb) for (let j = 1; j < n; j++) {
+      if (frac(0) <= 0 || frac(j) <= 0) continue;
+      if (Math.hypot(hb[0] - view[j * 3], hb[1] - view[j * 3 + 1], hb[2] - view[j * 3 + 2]) * rb < p.bloomD + p.clear) { bclash[0] = 1; bclash[j] = 1; }
+    }
     for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
       if (frac(i) <= 0 || frac(j) <= 0) continue;           // only pods already flown can clash
       const dx = view[i * 3] - view[j * 3], dy = view[i * 3 + 1] - view[j * 3 + 1], dz = view[i * 3 + 2] - view[j * 3 + 2];
@@ -305,6 +355,7 @@ export function create(ctx) {
         const r = r0 + (j + 0.5) * SEG; cmx += M_SEG * dx * r; cmy += M_SEG * dy * r; cmz += M_SEG * dz * r; mass += M_SEG;
       }
       if (q > 0 && bs > 0) { cmx += M_BLOOM * dx * rb; cmy += M_BLOOM * dy * rb; cmz += M_BLOOM * dz * rb; mass += M_BLOOM; }
+      if (q === 0 && hb && bs > 0) { cmx += M_BLOOM * hb[0] * rb; cmy += M_BLOOM * hb[1] * rb; cmz += M_BLOOM * hb[2] * rb; mass += M_BLOOM; }
       let ax = Math.abs(dy) < 0.9 ? [0, 1, 0] : [1, 0, 0];
       let ux = ax[1] * dz - ax[2] * dy, uy = ax[2] * dx - ax[0] * dz, uz = ax[0] * dy - ax[1] * dx;
       const um = Math.hypot(ux, uy, uz); ux /= um; uy /= um; uz /= um;
@@ -321,11 +372,14 @@ export function create(ctx) {
       if (f >= 0.7) for (let a = 0; a < 20; a++) ringPt(i++, rTip + CONE, 1.3, a * (Math.PI / 10));
       for (let a = 0; a < 20; a++) ringPt(i++, r0, p.podR * 0.55, a * (Math.PI / 10));
       park(i, o + POD - i); o += POD;
-      // bloom: gimbal mast along the pod, then a sun-facing disc (normal +x, world-fixed) — pod 0 docks instead
+      // bloom: gimbal mast along the pod, then a sun-facing disc (normal +x, world-fixed). Pod 0 docks instead, and
+      // its block draws the hub bloom: a mast from the hub through the gap between pods, same disc
       i = o;
-      if (q > 0 && R > 0 && f >= 0.75) {
-        for (let t = 0; t < 10; t++) ringPt(i++, rCone + (mast * t) / 9, 0.25, t * 2.1);
-        const C = spinV(dx * rb, dy * rb, dz * rb);
+      const bd = q > 0 ? [dx, dy, dz] : hb;
+      if (bd && R > 0 && f >= 0.75) {
+        if (q > 0) for (let t = 0; t < 10; t++) ringPt(i++, rCone + (mast * t) / 9, 0.25, t * 2.1);
+        else for (let t = 0; t < 10; t++) { const r = p.hub + ((rb - p.hub) * t) / 9; W(i++, bd[0] * r, bd[1] * r, bd[2] * r); }
+        const C = spinV(bd[0] * rb, bd[1] * rb, bd[2] * rb);
         for (let ring = 1; ring <= 6; ring++) for (let a = 0; a < 24; a++) {
           const rr = (R * bs * ring) / 6, t = (a / 24) * 2 * Math.PI + (ring & 1) * 0.13;
           Wsun(i++, C[0], C[1] + rr * Math.cos(t), C[2] + rr * Math.sin(t));
@@ -347,7 +401,7 @@ export function create(ctx) {
         ny /= nm; nz /= nm;
         const wx = ny * P[2] - nz * P[1], wy = nz * P[0] - nx * P[2], wz = nx * P[1] - ny * P[0]; // w = n × P
         for (const sg of [1, -1]) for (let a = 0; a < 12; a++) for (let b = 0; b < 4; b++) {
-          const r = r0 + podLen * (0.35 + (0.6 * a) / 11), off = sg * (p.podR + 0.4 + (3 * b) / 3);
+          const r = r0 + podLen * (0.35 + (0.6 * a) / 11) - (q === 0 ? FIN0_DROP : 0), off = sg * (p.podR + 0.4 + (RAD_W * b) / 3);
           Wsun(i++, P[0] * r + wx * off, P[1] * r + wy * off, P[2] * r + wz * off);
         }
       }
@@ -355,8 +409,8 @@ export function create(ctx) {
       // clash rings
       for (let a = 0; a < RING; a++) { if (clash[q]) ringPt(o + a, r0, p.podR + 0.35, (a * 2 * Math.PI) / RING); else put(o + a, 0, 0, 0); }
       o += RING;
-      if (bclash[q] && q > 0 && R > 0) {
-        const C = spinV(dx * rb, dy * rb, dz * rb);
+      if (bclash[q] && bd && R > 0) {
+        const C = spinV(bd[0] * rb, bd[1] * rb, bd[2] * rb);
         for (let a = 0; a < BRING; a++) Wsun(o + a, C[0] + 0.1, C[1] + (R + 0.4) * Math.cos((a * 2 * Math.PI) / BRING), C[2] + (R + 0.4) * Math.sin((a * 2 * Math.PI) / BRING));
       } else park(o, BRING);
     }

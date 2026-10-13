@@ -156,7 +156,7 @@ for i, (y, z) in enumerate(((0, 950), (1350, -1150), (-1350, -1150))):
     engines += [f"powerhead_{i}", f"ssme_{i}"]
 
 # ---------------- Canadarm (RMS), stowed on the port sill ----------------
-ay, az = 2150, 1500
+ay, az = 2500, 1700  # outboard of the Ø4.16 m flight segments lifting out, above the open doors' hinges
 orbiter.box("rms_shoulder", 600, 500, 600, at=(9500, ay, az), op="new", body="rms_shoulder")
 orbiter.cylinder("rms_upper", radius=190, height=6300, at=(9200, ay, az), direction=(-1, 0, 0), op="new", body="rms_upper")
 orbiter.cylinder("rms_elbow", radius=240, height=500, at=(2800, ay - 250, az), direction=(0, 1, 0), op="new", body="rms_elbow")

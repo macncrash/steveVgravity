@@ -161,7 +161,7 @@ def orbiter_bodies(stretch=0):
         add(_ruled(secs), GREY, 0.4)
 
     # Canadarm stowed on the port sill
-    ay, az = 2150, 1500
+    ay, az = 2500, 1700  # outboard of the Ø4.16 m flight segments lifting out, above the open doors' hinges
     add(box((9500, ay, az), np.eye(3), (600, 500, 600)), SILVER, 0.3)
     add(frustum(190, 190, 6300, (9200, ay, az), (-1, 0, 0), 16), WHITE)
     add(frustum(240, 240, 500, (2800, ay - 250, az), (0, 1, 0), 16), SILVER, 0.3)
